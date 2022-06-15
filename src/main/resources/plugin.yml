@@ -1,0 +1,11 @@
+name: Bank
+version: '${project.version}'
+main: dvdishka.bank.Bank
+api-version: 1.19
+prefix: Bank
+authors: [ dvdishka ]
+description: Bank plugin for DVDcraft
+website: dvdcraft.ru
+commands:
+  bank:
+    description: Main command of bank plugin

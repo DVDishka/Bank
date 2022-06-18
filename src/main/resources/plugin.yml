@@ -9,3 +9,6 @@ website: dvdcraft.ru
 commands:
   bank:
     description: Main command of bank plugin
+  shop:
+    description: Shop command
+

@@ -1,4 +1,4 @@
-package dvdishka.bank.common;
+package dvdishka.bank.Blancville.Classes;
 
 public class JsonPrices {
 

@@ -1,4 +1,4 @@
-package dvdishka.bank.Blancville;
+package dvdishka.bank.Blancville.Classes;
 
 public class Card {
 

@@ -1,41 +1,46 @@
 package dvdishka.bank;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dvdishka.bank.Shop.Items;
-import dvdishka.bank.Shop.Shop;
-import dvdishka.bank.Shop.Shops;
+import dvdishka.bank.Shop.Classes.Shop;
+import dvdishka.bank.Shop.Classes.ShopItem;
+import dvdishka.bank.Shop.Classes.ShopItemEnchantment;
 import dvdishka.bank.common.CommonVariables;
-import dvdishka.bank.common.JsonPrices;
-import dvdishka.bank.common.Prices;
-import dvdishka.bank.handlers.CommandExecutor;
-import dvdishka.bank.handlers.TabCompleter;
+import dvdishka.bank.Blancville.Classes.JsonPrices;
+import dvdishka.bank.Blancville.Classes.Prices;
+import dvdishka.bank.Blancville.blancvilleHandlers.CommandExecutor;
+import dvdishka.bank.Shop.shopHandlers.EventHandler;
+import dvdishka.bank.Blancville.blancvilleHandlers.TabCompleter;
+import it.unimi.dsi.fastutil.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.units.qual.C;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.*;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public final class Bank extends JavaPlugin {
-
-    static {
-        ConfigurationSerialization.registerClass(Shops.class, "Shops");
-        ConfigurationSerialization.registerClass(Shop.class, "Shop");
-        ConfigurationSerialization.registerClass(Items.class, "Items");
-    }
 
     @Override
     public void onEnable() {
 
         File rootDir = new File("plugins/Bank");
         File pricesFile = new File("plugins/Bank/prices.json");
-        File shopsFile = new File("plugins/Bank/shops.yml");
+        File shopsFile = new File("plugins/Bank/shops.json");
+        File playerCardsDir = new File("plugins/Bank/Cards");
+
         if (!rootDir.exists()) {
             if (rootDir.mkdir()) {
                 CommonVariables.logger.info("Bank directory has been created!");
@@ -46,12 +51,12 @@ public final class Bank extends JavaPlugin {
         if (!shopsFile.exists()) {
             try {
                 if (shopsFile.createNewFile()) {
-                    CommonVariables.logger.info("shops.yml file has been created!");
+                    CommonVariables.logger.info("shops.json file has been created!");
                 } else {
-                    CommonVariables.logger.warning("shops.yml file can not be created!");
+                    CommonVariables.logger.warning("shops.json file can not be created!");
                 }
             } catch (Exception e) {
-                CommonVariables.logger.warning("shops.yml file can not be created!");
+                CommonVariables.logger.warning("shops.json file can not be created!");
             }
         }
         if (!pricesFile.exists()) {
@@ -82,26 +87,95 @@ public final class Bank extends JavaPlugin {
             } catch (Exception e) {
                 CommonVariables.logger.warning("prices.json file can not be read!");
             }
-            File file = new File("plugins/Bank/shops.yml");
-            FileConfiguration shopsConfig = YamlConfiguration.loadConfiguration(file);
-            Shops shops = (Shops) shopsConfig.get("Shops");
-            if (shops != null) {
-                for (Shop shop : shops.getShops()) {
-                    CommonVariables.shops.add(shop);
+            try {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                FileReader fileReader = new FileReader(shopsFile);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                String json = "";
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    json = json.concat(line);
                 }
+                bufferedReader.close();
+                fileReader.close();
+                Type arrayListShop = new TypeToken<ArrayList<Shop>>(){}.getType();
+                ArrayList<Shop> shops = gson.fromJson(json, arrayListShop);
+                if (shops != null) {
+                    for (Shop shop : shops) {
+                        CommonVariables.shops.add(shop);
+                        Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName());
+                        int i = 0;
+
+                        for (ShopItem item : shop.getItems()) {
+                            if (item != null) {
+                                if (item.getMaterial() != Material.ENCHANTED_BOOK) {
+                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
+                                    itemStack.setLore(item.getLore());
+                                    for (ShopItemEnchantment shopItemEnchantment : item.getEnchantments()) {
+                                        if (shopItemEnchantment.getEnchantment() != null) {
+                                            itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
+                                        }
+                                    }
+                                    inventory.setItem(i, itemStack);
+                                } else {
+                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
+                                    itemStack.setLore(item.getLore());
+                                    EnchantmentStorageMeta enchantmentStorageMeta =
+                                            (EnchantmentStorageMeta) itemStack.getItemMeta();
+
+                                    for (ShopItemEnchantment shopItemEnchantment : item.getEnchantments()) {
+                                        if (shopItemEnchantment.getEnchantment() != null) {
+                                            enchantmentStorageMeta.addStoredEnchant(shopItemEnchantment.getEnchantment(),
+                                                    shopItemEnchantment.getLevel(), true);
+                                        }
+                                    }
+                                    itemStack.setItemMeta(enchantmentStorageMeta);
+                                    inventory.setItem(i, itemStack);
+                                }
+                            } else {
+                                inventory.setItem(i, null);
+                            }
+                            i++;
+                        }
+
+                        CommonVariables.shopsInventories.put(shop.getName(), inventory);
+                    }
+                }
+            } catch (Exception e) {
+                CommonVariables.logger.warning(e.getMessage());
+                CommonVariables.logger.warning("Something went wrong while trying to read shops.json file!");
             }
         }
-
+        if (!playerCardsDir.exists()) {
+            try {
+                if (playerCardsDir.mkdir()) {
+                    CommonVariables.logger.info("cards.json file has been created!");
+                } else {
+                    CommonVariables.logger.warning("Something went wrong while trying to create cards.json file!");
+                }
+            } catch (Exception e) {
+                CommonVariables.logger.warning("Something went wrong while trying to create cards.json file!");
+            }
+        }
 
         PluginCommand bankCommand = Bukkit.getPluginCommand("bank");
         PluginCommand shopCommand = Bukkit.getPluginCommand("shop");
 
-        CommandExecutor commandExecutor = new CommandExecutor();
-        TabCompleter tabCompleter = new TabCompleter();
+        CommandExecutor bankCommandExecutor = new CommandExecutor();
+        TabCompleter bankTabCompleter = new TabCompleter();
 
-        bankCommand.setExecutor(commandExecutor);
-        bankCommand.setTabCompleter(tabCompleter);
-        shopCommand.setExecutor(commandExecutor);
+        dvdishka.bank.Shop.shopHandlers.CommandExecutor shopCommandExecutor = new dvdishka.bank.Shop.shopHandlers.CommandExecutor();
+        dvdishka.bank.Shop.shopHandlers.TabCompleter shopTabCompleter = new dvdishka.bank.Shop.shopHandlers.TabCompleter();
+
+        Bukkit.getPluginManager().registerEvents(new EventHandler(), this);
+
+        assert bankCommand != null;
+        bankCommand.setExecutor(bankCommandExecutor);
+        bankCommand.setTabCompleter(bankTabCompleter);
+
+        assert shopCommand != null;
+        shopCommand.setExecutor(shopCommandExecutor);
+        shopCommand.setTabCompleter(shopTabCompleter);
 
         CommonVariables.logger.info("Bank plugin has been enabled!");
     }
@@ -121,13 +195,51 @@ public final class Bank extends JavaPlugin {
         } catch (Exception e) {
             CommonVariables.logger.warning("Can not write prices.json file");
         }
-        File shopsFile = new File("plugins/Bank/shops.yml");
-        YamlConfiguration shops = new YamlConfiguration();
-        shops.set("Shops", new Shops(CommonVariables.shops));
+
+
+        for (Map.Entry<String, Inventory> entry : CommonVariables.shopsInventories.entrySet()) {
+            int i = 0;
+            ArrayList<ShopItem> items = new ArrayList<>();
+            for (ItemStack itemStack : entry.getValue().getStorageContents()) {
+                if (itemStack != null) {
+                    ArrayList<ShopItemEnchantment> enchantments = new ArrayList<>();
+                    if (itemStack.getType() != Material.ENCHANTED_BOOK) {
+                        for (Map.Entry<Enchantment, Integer> enchantmentEntry : itemStack.getEnchantments().entrySet()) {
+                            enchantments.add(new ShopItemEnchantment(enchantmentEntry.getKey().getName(), enchantmentEntry.getValue()));
+                        }
+                    } else {
+                        EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+                        for (Map.Entry<Enchantment, Integer> enchantmentEntry :
+                                enchantmentStorageMeta.getStoredEnchants().entrySet()) {
+
+                            enchantments.add(new ShopItemEnchantment(enchantmentEntry.getKey().getName(),
+                                    enchantmentEntry.getValue()));
+                        }
+                    }
+                    try {
+                        items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
+                                itemStack.getItemMeta().getLore(), enchantments));
+                    } catch (Exception e) {
+                        items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                -1, itemStack.getItemMeta().getLore(), enchantments));
+                    }
+                } else {
+                    items.add(null);
+                }
+                i++;
+            }
+            Shop.getShop(entry.getKey()).setItems(items);
+        }
         try {
-            shops.save(shopsFile);
-        } catch (IOException e) {
-            CommonVariables.logger.warning("Something went wrong while trying to save shops file!");
+            File shopsFile = new File("plugins/Bank/shops.json");
+            GsonBuilder gsonBuilder = new GsonBuilder();
+            Gson gson = gsonBuilder.setPrettyPrinting().create();
+            FileWriter fileWriter = new FileWriter(shopsFile);
+            fileWriter.write(gson.toJson(CommonVariables.shops));
+            fileWriter.close();
+        } catch (Exception e) {
+            CommonVariables.logger.warning("Can not write shops.json file");
         }
         CommonVariables.logger.info("Bank plugin has been disabled!");
     }

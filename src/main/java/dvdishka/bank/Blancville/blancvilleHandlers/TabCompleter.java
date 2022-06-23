@@ -1,4 +1,4 @@
-package dvdishka.bank.handlers;
+package dvdishka.bank.Blancville.blancvilleHandlers;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

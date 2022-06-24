@@ -56,11 +56,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
 
         if (args.length == 3) {
 
-            if (args[0].equals("create")) {
-                return List.of("cardNumber");
-            }
-
-            else if (args[0].equals("edit")) {
+            if (args[0].equals("edit")) {
                 return List.of("price", "card");
             }
         }

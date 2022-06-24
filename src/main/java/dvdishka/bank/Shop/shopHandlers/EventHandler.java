@@ -6,18 +6,12 @@ import dvdishka.bank.Blancville.Classes.Card;
 import dvdishka.bank.Shop.Classes.PlayerCard;
 import dvdishka.bank.Shop.Classes.Shop;
 import dvdishka.bank.common.CommonVariables;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.BufferedReader;
 import java.io.File;

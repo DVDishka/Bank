@@ -1,5 +1,9 @@
 package dvdishka.bank.Shop.shopHandlers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import dvdishka.bank.Blancville.Classes.Card;
+import dvdishka.bank.Shop.Classes.PlayerCard;
 import dvdishka.bank.Shop.Classes.Shop;
 import dvdishka.bank.common.CommonVariables;
 import org.bukkit.Bukkit;
@@ -13,7 +17,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.List;
 
 public class CommandExecutor implements org.bukkit.command.CommandExecutor {
@@ -27,26 +34,74 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
         Player player = Bukkit.getPlayer(sender.getName());
         String commandName = args[0];
 
-        if (commandName.equals("create") && args.length == 3) {
-            int cardNumber = 0;
+        if (commandName.equals("create") && args.length == 2) {
+            File cardFile = new File("plugins/Bank/Cards/" + player.getName() + ".json");
+            if (!cardFile.exists()) {
+                sender.sendMessage(ChatColor.RED + "You have no card!");
+                return false;
+            }
+            int number = 0;
             try {
-                cardNumber = Integer.parseInt(args[2]);
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                FileReader fileReader = new FileReader(cardFile);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                String json = "";
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    json = json.concat(line);
+                }
+                bufferedReader.close();
+                fileReader.close();
+                PlayerCard playerCard = gson.fromJson(json, PlayerCard.class);
+                number = playerCard.getNumber();
+
+                FileReader playerFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/" +
+                        number + ".json");
+                BufferedReader playerBufferedReader = new BufferedReader(playerFileReader);
+                String playerJson = "";
+                String playerLine;
+                while ((playerLine = playerBufferedReader.readLine()) != null) {
+                    playerJson = playerJson.concat(playerLine);
+                }
+                playerBufferedReader.close();
+                playerFileReader.close();
+                Card card = gson.fromJson(playerJson, Card.class);
+                if (card.getMoney() < 10) {
+                    sender.sendMessage(ChatColor.RED + "You does not have 10 l`argent!");
+                    return false;
+                }
+                card.setMoney(card.getMoney() - 10);
+                FileWriter playerFileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/" +
+                        number + ".json");
+                playerFileWriter.write(gson.toJson(card));
+                playerFileWriter.close();
+
+                FileReader adminFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/111111.json");
+                BufferedReader adminBufferedReader = new BufferedReader(adminFileReader);
+                String adminJson = "";
+                String adminLine;
+                while ((adminLine = adminBufferedReader.readLine()) != null) {
+                    adminJson = adminJson.concat(adminLine);
+                }
+                adminBufferedReader.close();
+                adminFileReader.close();
+                Card adminCard = gson.fromJson(json, Card.class);
+                adminCard.setMoney(adminCard.getMoney() + 10);
+                FileWriter adminFileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/111111.json");
+                adminFileWriter.write(gson.toJson(adminCard));
+                adminFileWriter.close();
             } catch (Exception e) {
-                sender.sendMessage(ChatColor.RED + "Card must be a number!");
+                sender.sendMessage(ChatColor.RED + "Something went wrong!");
                 return false;
             }
-            File file = new File("/home/server/minecraft/Blancville_bank/users/" + cardNumber + ".json");
-            if (!file.exists()) {
-                sender.sendMessage(ChatColor.RED + "Card with that number does not exist!");
-                return false;
-            }
+
             for (Shop checkShop : CommonVariables.shops) {
                 if (checkShop.getName().equals(args[1])) {
                     sender.sendMessage(ChatColor.RED + "There is already a shop with the same name!");
                     return false;
                 }
             }
-            Shop shop = new Shop(args[1], player.getName(), cardNumber);
+            Shop shop = new Shop(args[1], player.getName(), number);
             CommonVariables.shops.add(shop);
             CommonVariables.shopsInventories.put(shop.getName(),
                     Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName()));
@@ -115,6 +170,10 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 price = Integer.parseInt(args[5]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Price must be a number!");
+                return false;
+            }
+            if (price <= 0) {
+                sender.sendMessage(ChatColor.RED + "Price must be > 0!");
                 return false;
             }
             if (CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1) == null ||

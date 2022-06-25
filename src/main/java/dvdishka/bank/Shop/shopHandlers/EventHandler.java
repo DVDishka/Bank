@@ -138,7 +138,7 @@ public class EventHandler implements Listener {
                                         fileWriter.write(gson.toJson(card));
                                         fileWriter.close();
                                     } else {
-                                        event.getWhoClicked().sendMessage(ChatColor.RED + "You have not " + price + " l`argent");
+                                        event.getWhoClicked().sendMessage(ChatColor.RED + "You dont have " + price + " l`argent");
                                         event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
                                                 (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
                                                         Sound.Source.BLOCK, 50, 1));

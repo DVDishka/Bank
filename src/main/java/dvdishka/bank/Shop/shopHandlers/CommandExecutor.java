@@ -91,6 +91,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 adminFileWriter.write(gson.toJson(adminCard));
                 adminFileWriter.close();
             } catch (Exception e) {
+                CommonVariables.logger.warning(e.getMessage());
                 sender.sendMessage(ChatColor.RED + "Something went wrong!");
                 return false;
             }

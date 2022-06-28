@@ -14,15 +14,17 @@ public class ShopItem implements Serializable {
     private int amount;
     private int price;
     private List<String> lore;
-    private ArrayList<ShopItemEnchantment> enchantments = new ArrayList<>();
+    private ArrayList<ShopItemEnchantment> enchantments;
+    private ArrayList<ShopItemPotionEffect> potionEffects;
 
     public ShopItem(String material, int amount, int price, List<String> lore,
-                    ArrayList<ShopItemEnchantment> enchantments ArrayList<>) {
+                    ArrayList<ShopItemEnchantment> enchantments, ArrayList<ShopItemPotionEffect> potionEffects) {
         this.material = material;
         this.amount = amount;
         this.price = price;
         this.lore = lore;
         this.enchantments = enchantments;
+        this.potionEffects = potionEffects;
     }
 
     public Material getMaterial() {
@@ -45,6 +47,10 @@ public class ShopItem implements Serializable {
         return this.enchantments;
     }
 
+    public ArrayList<ShopItemPotionEffect> getPotionEffects() {
+        return this.potionEffects;
+    }
+
     public void setMaterial(String material) {
         this.material = material;
     }
@@ -63,5 +69,9 @@ public class ShopItem implements Serializable {
 
     public void setEnchantments(ArrayList<ShopItemEnchantment> enchantments) {
         this.enchantments = enchantments;
+    }
+
+    public void setPotionEffects(ArrayList<ShopItemPotionEffect> potionEffects) {
+        this.potionEffects = potionEffects;
     }
 }

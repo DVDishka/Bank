@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import dvdishka.bank.Shop.Classes.Shop;
 import dvdishka.bank.Shop.Classes.ShopItem;
 import dvdishka.bank.Shop.Classes.ShopItemEnchantment;
+import dvdishka.bank.Shop.Classes.ShopItemPotionEffect;
 import dvdishka.bank.common.CommonVariables;
 import dvdishka.bank.Blancville.Classes.JsonPrices;
 import dvdishka.bank.Blancville.Classes.Prices;
@@ -24,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.checkerframework.checker.units.qual.A;
 
 import java.io.*;
@@ -109,28 +111,7 @@ public final class Bank extends JavaPlugin {
 
                         for (ShopItem item : shop.getItems()) {
                             if (item != null) {
-                                if (item.getMaterial() != Material.ENCHANTED_BOOK) {
-                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
-                                    itemStack.setLore(item.getLore());
-                                    for (ShopItemEnchantment shopItemEnchantment : item.getEnchantments()) {
-                                        if (shopItemEnchantment.getEnchantment() != null) {
-                                            itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
-                                        }
-                                    }
-                                    inventory.setItem(i, itemStack);
-                                } else if (item.getMaterial().equals(Material.POTION)) {
-                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
-                                    itemStack.setLore(item.getLore());
-                                    PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
-                                    for (Potion potion : item.getPotionEffects()) {
-                                        if (shopItemEnchantment.getEnchantment() != null) {
-                                            enchantmentStorageMeta.addStoredEnchant(shopItemEnchantment.getEnchantment(),
-                                                    shopItemEnchantment.getLevel(), true);
-                                        }
-                                    }
-                                    itemStack.setItemMeta(enchantmentStorageMeta);
-                                    inventory.setItem(i, itemStack);
-                                } else {
+                                if (item.getMaterial() == Material.ENCHANTED_BOOK) {
                                     ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
                                     itemStack.setLore(item.getLore());
                                     EnchantmentStorageMeta enchantmentStorageMeta =
@@ -144,13 +125,32 @@ public final class Bank extends JavaPlugin {
                                     }
                                     itemStack.setItemMeta(enchantmentStorageMeta);
                                     inventory.setItem(i, itemStack);
+                                } else if (item.getMaterial().equals(Material.POTION)) {
+                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
+                                    itemStack.setLore(item.getLore());
+                                    PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
+                                    for (ShopItemPotionEffect effect : item.getPotionEffects()) {
+                                        if (effect.getEffect() != null) {
+                                            potionMeta.addCustomEffect(effect.getEffect(), true);
+                                        }
+                                    }
+                                    itemStack.setItemMeta(potionMeta);
+                                    inventory.setItem(i, itemStack);
+                                } else {
+                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
+                                    itemStack.setLore(item.getLore());
+                                    for (ShopItemEnchantment shopItemEnchantment : item.getEnchantments()) {
+                                        if (shopItemEnchantment.getEnchantment() != null) {
+                                            itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
+                                        }
+                                    }
+                                    inventory.setItem(i, itemStack);
                                 }
                             } else {
                                 inventory.setItem(i, null);
                             }
                             i++;
                         }
-
                         CommonVariables.shopsInventories.put(shop.getName(), inventory);
                     }
                 }
@@ -214,13 +214,13 @@ public final class Bank extends JavaPlugin {
             int i = 0;
             ArrayList<ShopItem> items = new ArrayList<>();
             for (ItemStack itemStack : entry.getValue().getStorageContents()) {
+
+
                 if (itemStack != null) {
                     ArrayList<ShopItemEnchantment> enchantments = new ArrayList<>();
-                    if (itemStack.getType() != Material.ENCHANTED_BOOK) {
-                        for (Map.Entry<Enchantment, Integer> enchantmentEntry : itemStack.getEnchantments().entrySet()) {
-                            enchantments.add(new ShopItemEnchantment(enchantmentEntry.getKey().getName(), enchantmentEntry.getValue()));
-                        }
-                    } else {
+
+
+                    if (itemStack.getType() == Material.ENCHANTED_BOOK) {
                         EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) itemStack.getItemMeta();
                         for (Map.Entry<Enchantment, Integer> enchantmentEntry :
                                 enchantmentStorageMeta.getStoredEnchants().entrySet()) {
@@ -228,14 +228,51 @@ public final class Bank extends JavaPlugin {
                             enchantments.add(new ShopItemEnchantment(enchantmentEntry.getKey().getName(),
                                     enchantmentEntry.getValue()));
                         }
-                    }
-                    try {
-                        items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
-                                Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
-                                itemStack.getItemMeta().getLore(), enchantments));
-                    } catch (Exception e) {
-                        items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
-                                -1, itemStack.getItemMeta().getLore(), enchantments));
+
+                        try {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
+                                    itemStack.getItemMeta().getLore(), enchantments, null));
+                        } catch (Exception e) {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    -1, itemStack.getItemMeta().getLore(), enchantments, null));
+                        }
+
+
+                    } else if (itemStack.getType() == Material.POTION) {
+
+
+                        PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
+                        ArrayList<ShopItemPotionEffect> potionEffects = new ArrayList<>();
+                        for (PotionEffect effect : potionMeta.getCustomEffects()) {
+                            potionEffects.add(new ShopItemPotionEffect(effect.getType().getName(), effect.getDuration(), effect.getAmplifier()));
+                        }
+
+                        try {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
+                                    itemStack.getItemMeta().getLore(), null, potionEffects));
+                        } catch (Exception e) {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    -1, itemStack.getItemMeta().getLore(), null, potionEffects));
+                        }
+
+
+                    } else {
+
+
+                        for (Map.Entry<Enchantment, Integer> enchantmentEntry : itemStack.getEnchantments().entrySet()) {
+                            enchantments.add(new ShopItemEnchantment(enchantmentEntry.getKey().getName(), enchantmentEntry.getValue()));
+                        }
+
+                        try {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
+                                    itemStack.getItemMeta().getLore(), enchantments, null));
+                        } catch (Exception e) {
+                            items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
+                                    -1, itemStack.getItemMeta().getLore(), enchantments, null));
+                        }
                     }
                 } else {
                     items.add(null);

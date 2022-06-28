@@ -16,7 +16,8 @@ public class ShopItem implements Serializable {
     private List<String> lore;
     private ArrayList<ShopItemEnchantment> enchantments = new ArrayList<>();
 
-    public ShopItem(String material, int amount, int price, List<String> lore, ArrayList<ShopItemEnchantment> enchantments) {
+    public ShopItem(String material, int amount, int price, List<String> lore,
+                    ArrayList<ShopItemEnchantment> enchantments ArrayList<>) {
         this.material = material;
         this.amount = amount;
         this.price = price;

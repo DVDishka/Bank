@@ -22,6 +22,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.units.qual.A;
 
@@ -116,6 +117,18 @@ public final class Bank extends JavaPlugin {
                                             itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
                                         }
                                     }
+                                    inventory.setItem(i, itemStack);
+                                } else if (item.getMaterial().equals(Material.POTION)) {
+                                    ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());
+                                    itemStack.setLore(item.getLore());
+                                    PotionMeta potionMeta = (PotionMeta) itemStack.getItemMeta();
+                                    for (Potion potion : item.getPotionEffects()) {
+                                        if (shopItemEnchantment.getEnchantment() != null) {
+                                            enchantmentStorageMeta.addStoredEnchant(shopItemEnchantment.getEnchantment(),
+                                                    shopItemEnchantment.getLevel(), true);
+                                        }
+                                    }
+                                    itemStack.setItemMeta(enchantmentStorageMeta);
                                     inventory.setItem(i, itemStack);
                                 } else {
                                     ItemStack itemStack = new ItemStack(item.getMaterial(), item.getAmount());

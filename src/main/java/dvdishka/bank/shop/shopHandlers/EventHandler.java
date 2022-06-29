@@ -96,7 +96,7 @@ public class EventHandler implements Listener {
 
 
                                     price = Integer.parseInt(event.getCurrentItem().getLore().get(event.getCurrentItem().getLore().size() - 1));
-                                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                                    Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
 
 
                                     File file = new File("plugins/Bank/Cards/" + event.getWhoClicked().getName() + ".json");

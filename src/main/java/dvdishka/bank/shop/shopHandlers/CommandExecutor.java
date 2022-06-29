@@ -42,7 +42,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             }
             int number = 0;
             try {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
                 FileReader fileReader = new FileReader(cardFile);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
                 String json = "";

@@ -50,7 +50,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             }
             Card bankCard;
             try {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
                 FileReader fileReader = new FileReader(file);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
                 String json = "";
@@ -100,7 +100,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             try {
                 bankCard.setMoney(bankCard.getMoney() + Prices.getDiamondPrice() * amountSell);
                 GsonBuilder gsonBuilder = new GsonBuilder();
-                Gson gson = gsonBuilder.setPrettyPrinting().create();
+                Gson gson = gsonBuilder.setPrettyPrinting().serializeNulls().create();
                 FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write(gson.toJson(bankCard));
                 fileWriter.close();
@@ -134,7 +134,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             }
             Card bankCard;
             try {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
                 FileReader fileReader = new FileReader(file);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
                 String json = "";
@@ -184,7 +184,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             try {
                 bankCard.setMoney(bankCard.getMoney() + Prices.getNetheritePrice() * amountSell);
                 GsonBuilder gsonBuilder = new GsonBuilder();
-                Gson gson = gsonBuilder.setPrettyPrinting().create();
+                Gson gson = gsonBuilder.setPrettyPrinting().serializeNulls().create();
                 FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write(gson.toJson(bankCard));
                 fileWriter.close();

@@ -1,4 +1,4 @@
-package dvdishka.bank.shop.Classes.potion;
+package dvdishka.bank.shop.Classes.meta.potion;
 
 import java.io.Serializable;
 

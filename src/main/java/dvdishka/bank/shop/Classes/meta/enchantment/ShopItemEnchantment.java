@@ -1,4 +1,4 @@
-package dvdishka.bank.shop.Classes.enchantment;
+package dvdishka.bank.shop.Classes.meta.enchantment;
 
 import java.io.Serializable;
 

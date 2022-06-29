@@ -1,8 +1,9 @@
-package dvdishka.bank.Shop.Classes;
+package dvdishka.bank.shop.Classes.shop;
 
-import it.unimi.dsi.fastutil.Pair;
+import dvdishka.bank.shop.Classes.enchantment.ShopItemEnchantment;
+import dvdishka.bank.shop.Classes.potion.MainPotionEffect;
+import dvdishka.bank.shop.Classes.potion.ShopItemPotionEffect;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,21 +11,30 @@ import java.util.List;
 
 public class ShopItem implements Serializable {
 
+    private String name;
     private String material;
     private int amount;
     private int price;
     private List<String> lore;
     private ArrayList<ShopItemEnchantment> enchantments;
+    MainPotionEffect mainPotionEffect;
     private ArrayList<ShopItemPotionEffect> potionEffects;
 
-    public ShopItem(String material, int amount, int price, List<String> lore,
-                    ArrayList<ShopItemEnchantment> enchantments, ArrayList<ShopItemPotionEffect> potionEffects) {
+    public ShopItem(String name, String material, int amount, int price, List<String> lore,
+                    ArrayList<ShopItemEnchantment> enchantments, MainPotionEffect mainPotionEffect,
+                    ArrayList<ShopItemPotionEffect> potionEffects) {
+        this.name = name;
         this.material = material;
         this.amount = amount;
         this.price = price;
         this.lore = lore;
         this.enchantments = enchantments;
+        this.mainPotionEffect = mainPotionEffect;
         this.potionEffects = potionEffects;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public Material getMaterial() {
@@ -47,8 +57,16 @@ public class ShopItem implements Serializable {
         return this.enchantments;
     }
 
+    public MainPotionEffect getMainPotionEffect() {
+        return this.mainPotionEffect;
+    }
+
     public ArrayList<ShopItemPotionEffect> getPotionEffects() {
         return this.potionEffects;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setMaterial(String material) {
@@ -69,6 +87,10 @@ public class ShopItem implements Serializable {
 
     public void setEnchantments(ArrayList<ShopItemEnchantment> enchantments) {
         this.enchantments = enchantments;
+    }
+
+    public void setMainPotionEffect(MainPotionEffect mainPotionEffect) {
+        this.mainPotionEffect = mainPotionEffect;
     }
 
     public void setPotionEffects(ArrayList<ShopItemPotionEffect> potionEffects) {

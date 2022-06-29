@@ -1,6 +1,6 @@
 package dvdishka.bank.common;
 
-import dvdishka.bank.Shop.Classes.Shop;
+import dvdishka.bank.shop.Classes.shop.Shop;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 

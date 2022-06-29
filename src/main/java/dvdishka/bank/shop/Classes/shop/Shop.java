@@ -1,4 +1,4 @@
-package dvdishka.bank.Shop.Classes;
+package dvdishka.bank.shop.Classes.shop;
 
 import dvdishka.bank.common.CommonVariables;
 

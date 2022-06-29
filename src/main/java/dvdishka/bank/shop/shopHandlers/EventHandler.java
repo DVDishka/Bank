@@ -1,10 +1,10 @@
-package dvdishka.bank.Shop.shopHandlers;
+package dvdishka.bank.shop.shopHandlers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dvdishka.bank.Blancville.Classes.Card;
-import dvdishka.bank.Shop.Classes.PlayerCard;
-import dvdishka.bank.Shop.Classes.Shop;
+import dvdishka.bank.blancville.Classes.Card;
+import dvdishka.bank.shop.Classes.shop.PlayerCard;
+import dvdishka.bank.shop.Classes.shop.Shop;
 import dvdishka.bank.common.CommonVariables;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.ChatColor;

@@ -1,10 +1,10 @@
-package dvdishka.bank.Blancville.blancvilleHandlers;
+package dvdishka.bank.blancville.blancvilleHandlers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dvdishka.bank.Blancville.Classes.Card;
+import dvdishka.bank.blancville.Classes.Card;
 import dvdishka.bank.common.CommonVariables;
-import dvdishka.bank.Blancville.Classes.Prices;
+import dvdishka.bank.blancville.Classes.Prices;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

@@ -1,6 +1,6 @@
-package dvdishka.bank.Shop.shopHandlers;
+package dvdishka.bank.shop.shopHandlers;
 
-import dvdishka.bank.Shop.Classes.Shop;
+import dvdishka.bank.shop.Classes.shop.Shop;
 import dvdishka.bank.common.CommonVariables;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

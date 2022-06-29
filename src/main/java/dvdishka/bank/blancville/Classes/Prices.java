@@ -1,4 +1,4 @@
-package dvdishka.bank.Blancville.Classes;
+package dvdishka.bank.blancville.Classes;
 
 public class Prices {
 

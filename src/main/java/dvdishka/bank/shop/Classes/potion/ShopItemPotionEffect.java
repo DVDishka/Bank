@@ -1,6 +1,5 @@
-package dvdishka.bank.Shop.Classes;
+package dvdishka.bank.shop.Classes.potion;
 
-import org.bukkit.Effect;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 

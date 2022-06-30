@@ -8,7 +8,7 @@ description: Bank plugin for DVDcraft
 website: dvdcraft.ru
 commands:
   bank:
-    description: Main command of bank plugin
+    description: Bank
   shop:
-    description: Shop command
+    description: Shop
 

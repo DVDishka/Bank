@@ -1,6 +1,6 @@
 name: Bank
 version: '${project.version}'
-main: dvdishka.bank.Bank
+main: ru.dvdishka.bank.Bank
 api-version: 1.19
 prefix: Bank
 authors: [ dvdishka ]

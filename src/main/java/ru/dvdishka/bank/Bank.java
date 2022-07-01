@@ -3,7 +3,13 @@ package ru.dvdishka.bank;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
+import org.checkerframework.checker.units.qual.A;
 import ru.dvdishka.bank.shop.Classes.meta.Meta;
+import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemPatternColor;
+import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemBanner;
+import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemPattern;
 import ru.dvdishka.bank.shop.Classes.meta.book.ShopItemBook;
 import ru.dvdishka.bank.shop.Classes.meta.firework.ShopItemFirework;
 import ru.dvdishka.bank.shop.Classes.meta.firework.ShopItemFireworkEffect;
@@ -158,14 +164,6 @@ public final class Bank extends JavaPlugin {
                                 } catch (Exception ignored) {}
 
                                 try {
-                                    for (ShopItemEnchantment shopItemEnchantment : item.getMeta().getEnchantments()) {
-                                        if (shopItemEnchantment.getEnchantment() != null) {
-                                            itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
-                                        }
-                                    }
-                                } catch (Exception ignored) {}
-
-                                try {
                                     FireworkMeta fireworkMeta = (FireworkMeta) itemMeta;
                                     ShopItemFirework shopItemFirework = item.getMeta().getShopItemFirework();
                                     ArrayList<FireworkEffect> effects = new ArrayList<>();
@@ -179,12 +177,33 @@ public final class Bank extends JavaPlugin {
                                         for (Integer fadeColor : effect.getFadeColors()) {
                                             fadeColors.add(Color.fromRGB(fadeColor));
                                         }
-                                        FireworkEffect.builder().withColor(colors).withFade(fadeColors).
+                                        effects.add(FireworkEffect.builder().withColor(colors).withFade(fadeColors).
                                                 flicker(effect.hasFlicker()).trail(effect.hasTrail()).with
-                                                        (FireworkEffect.Type.valueOf(effect.getType())).build();
+                                                        (FireworkEffect.Type.valueOf(effect.getType())).build());
                                     }
                                     fireworkMeta.addEffects(effects);
                                     itemStack.setItemMeta(fireworkMeta);
+                                } catch (Exception ignored) {}
+
+                                try {
+                                    BannerMeta bannerMeta = (BannerMeta) itemMeta;
+                                    ShopItemBanner shopItemBanner = item.getMeta().getShopItemBanner();
+                                    ArrayList<Pattern> patterns = new ArrayList<>();
+                                    for (ShopItemPattern pattern : shopItemBanner.getPatterns()) {
+                                        patterns.add(new Pattern(DyeColor.getByColor(Color.fromRGB(
+                                                pattern.getPatternColor().getColor())),
+                                                PatternType.getByIdentifier(pattern.getType())));
+                                    }
+                                    bannerMeta.setPatterns(patterns);
+                                    itemStack.setItemMeta(bannerMeta);
+                                } catch (Exception ignored) {}
+
+                                try {
+                                    for (ShopItemEnchantment shopItemEnchantment : item.getMeta().getEnchantments()) {
+                                        if (shopItemEnchantment.getEnchantment() != null) {
+                                            itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
+                                        }
+                                    }
                                 } catch (Exception ignored) {}
 
                                 inventory.setItem(i, itemStack);
@@ -320,17 +339,31 @@ public final class Bank extends JavaPlugin {
                         shopItemFirework = new ShopItemFirework(fireworkMeta.getPower(), effects);
                     } catch (Exception ignored) {}
 
+                    ShopItemBanner shopItemBanner = null;
+                    try {
+                        BannerMeta bannerMeta = (BannerMeta) itemStack.getItemMeta();
+                        ArrayList<ShopItemPattern> shopItemPatterns = new ArrayList<>();
+                        for (Pattern pattern : bannerMeta.getPatterns()) {
+                            ShopItemPattern shopItemPattern = new ShopItemPattern(pattern.getPattern().getIdentifier(),
+                                    new ShopItemPatternColor(pattern.getColor().getDyeData(), pattern.getColor().getWoolData(),
+                                            pattern.getColor().getColor().asRGB(), pattern.getColor().getFireworkColor().
+                                            asRGB()));
+                            shopItemPatterns.add(shopItemPattern);
+                        }
+                        shopItemBanner = new ShopItemBanner(shopItemPatterns);
+                    } catch (Exception ignored) {}
+
                     try {
                         items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
                                 Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
                                 new Meta(itemStack.getItemMeta().getDisplayName(), itemStack.getItemMeta().getLore(),
                                         enchantments, storedEnchantments, mainPotion, potionEffects, shopItemBook,
-                                        shopItemFirework)));
+                                        shopItemFirework, shopItemBanner)));
                     } catch (Exception e) {
                         items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(), -1,
                                 new Meta(itemStack.getItemMeta().getDisplayName(), itemStack.getItemMeta().getLore(),
                                         enchantments, storedEnchantments, mainPotion, potionEffects, shopItemBook,
-                                        shopItemFirework)));
+                                        shopItemFirework, shopItemBanner)));
                     }
                 } else {
                     items.add(null);

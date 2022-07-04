@@ -1,53 +1,51 @@
 package ru.dvdishka.bank.shop.Classes.shop;
 
-import ru.dvdishka.bank.shop.Classes.meta.Meta;
-import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ShopItem implements Serializable {
+@SerializableAs("ShopItem")
+public class ShopItem implements ConfigurationSerializable {
 
-    private String material;
-    private int amount;
+    private ItemStack item;
     private int price;
-    private Meta meta;
 
-    public ShopItem(String material, int amount, int price, Meta meta) {
-        this.material = material;
-        this.amount = amount;
+    public ShopItem(ItemStack item, int price) {
+        this.item = item;
         this.price = price;
-        this.meta = meta;
     }
 
-    public Material getMaterial() {
-        return Material.getMaterial(this.material);
-    }
-
-    public int getAmount() {
-        return this.amount;
+    public ItemStack getItem() {
+        return this.item;
     }
 
     public int getPrice() {
         return this.price;
     }
 
-    public Meta getMeta() {
-        return this.meta;
-    }
-
-    public void setMaterial(String material) {
-        this.material = material;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setItem(ItemStack item) {
+        this.item = item;
     }
 
     public void setPrice(int price) {
         this.price = price;
     }
 
-    public void setMeta(Meta meta) {
-        this.meta = meta;
+    @Override
+    public @NotNull Map<String, Object> serialize() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("item", item);
+        map.put("price", price);
+        return map;
+    }
+
+    public ShopItem deserialize(Map<String, Object> map) {
+        ItemStack item = ItemStack.deserialize((HashMap<String, Object>) map.get("item"));
+        int price = (int) map.get("price");
+        return new ShopItem(item, price);
     }
 }

@@ -1,5 +1,6 @@
 package ru.dvdishka.bank.shop.Classes.meta;
 
+import ru.dvdishka.bank.shop.Classes.map.ShopItemMap;
 import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemBanner;
 import ru.dvdishka.bank.shop.Classes.meta.book.ShopItemBook;
 import ru.dvdishka.bank.shop.Classes.meta.enchantment.ShopItemEnchantment;
@@ -21,11 +22,13 @@ public class Meta implements Serializable {
     private final ShopItemBook shopItemBook;
     private final ShopItemFirework shopItemFirework;
     private final ShopItemBanner shopItemBanner;
+    private final ShopItemMap shopItemMap;
 
     public Meta(String name, List<String> lore,
                     ArrayList<ShopItemEnchantment> enchantments, ArrayList<ShopItemEnchantment> storedEnchantments,
                 MainPotionEffect mainPotionEffect, ArrayList<ShopItemPotionEffect> potionEffects,
-                ShopItemBook shopItemBook, ShopItemFirework shopItemFirework, ShopItemBanner shopItemBanner) {
+                ShopItemBook shopItemBook, ShopItemFirework shopItemFirework, ShopItemBanner shopItemBanner,
+                ShopItemMap shopItemMap) {
         this.name = name;
         this.lore = lore;
         this.enchantments = enchantments;
@@ -35,6 +38,7 @@ public class Meta implements Serializable {
         this.shopItemBook = shopItemBook;
         this.shopItemFirework = shopItemFirework;
         this.shopItemBanner = shopItemBanner;
+        this.shopItemMap = shopItemMap;
     }
 
     public String getName() {
@@ -71,5 +75,9 @@ public class Meta implements Serializable {
 
     public ShopItemBanner getShopItemBanner() {
         return this.shopItemBanner;
+    }
+
+    public ShopItemMap getShopItemMap() {
+        return this.shopItemMap;
     }
 }

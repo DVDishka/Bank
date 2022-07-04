@@ -5,7 +5,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.checkerframework.checker.units.qual.A;
+import ru.dvdishka.bank.shop.Classes.map.ShopItemMap;
+import ru.dvdishka.bank.shop.Classes.map.ShopItemMapView;
 import ru.dvdishka.bank.shop.Classes.meta.Meta;
 import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemPatternColor;
 import ru.dvdishka.bank.shop.Classes.meta.banner.ShopItemBanner;
@@ -199,6 +203,24 @@ public final class Bank extends JavaPlugin {
                                 } catch (Exception ignored) {}
 
                                 try {
+                                    MapMeta mapMeta = (MapMeta) itemMeta;
+                                    ShopItemMap shopItemMap = item.getMeta().getShopItemMap();
+                                    ShopItemMapView shopItemMapView = item.getMeta().getShopItemMap().getMapView();
+                                    mapMeta.setColor(Color.fromRGB(shopItemMap.getColor()));
+                                    mapMeta.setLocationName(shopItemMap.getLocationName());
+                                    mapMeta.setScaling(shopItemMap.isScaling());
+                                    MapView mapView = mapMeta.getMapView();
+                                    mapView.setCenterX(shopItemMapView.getCenterX());
+                                    mapView.setCenterZ(shopItemMapView.getCenterZ());
+                                    mapView.setLocked(shopItemMapView.isLocked());
+                                    mapView.setWorld(Bukkit.getWorld(shopItemMapView.getWorldName()));
+                                    mapView.setTrackingPosition(shopItemMapView.isTrackingPosition());
+                                    mapView.setUnlimitedTracking(shopItemMapView.isUnlimitedTracking());
+                                    mapView.setScale(MapView.Scale.valueOf(shopItemMapView.getScale()));
+                                    itemStack.setItemMeta(mapMeta);
+                                } catch (Exception ignored) {}
+
+                                try {
                                     for (ShopItemEnchantment shopItemEnchantment : item.getMeta().getEnchantments()) {
                                         if (shopItemEnchantment.getEnchantment() != null) {
                                             itemStack.addEnchantment(shopItemEnchantment.getEnchantment(), shopItemEnchantment.getLevel());
@@ -353,17 +375,33 @@ public final class Bank extends JavaPlugin {
                         shopItemBanner = new ShopItemBanner(shopItemPatterns);
                     } catch (Exception ignored) {}
 
+                    ShopItemMap shopItemMap = null;
+                    try {
+                        MapMeta mapMeta = (MapMeta) itemStack.getItemMeta();
+                        MapView mapView = mapMeta.getMapView();
+                        ShopItemMapView shopItemMapView = new ShopItemMapView(mapView.getCenterX(), mapView.getCenterZ(),
+                                mapView.getId(), mapView.getWorld().getName(), mapView.getScale().toString(), mapView.isLocked(),
+                                mapView.isTrackingPosition(), mapView.isUnlimitedTracking());
+                        try {
+                            shopItemMap = new ShopItemMap(shopItemMapView, mapMeta.getColor().asRGB(), mapMeta.getLocationName(),
+                                    mapMeta.isScaling());
+                        } catch (Exception e) {
+                            shopItemMap = new ShopItemMap(shopItemMapView, 0, mapMeta.getLocationName(),
+                                    mapMeta.isScaling());
+                        }
+                    } catch (Exception ignored) {}
+
                     try {
                         items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(),
                                 Integer.parseInt(itemStack.getLore().get(itemStack.getLore().size() - 1)),
                                 new Meta(itemStack.getItemMeta().getDisplayName(), itemStack.getItemMeta().getLore(),
                                         enchantments, storedEnchantments, mainPotion, potionEffects, shopItemBook,
-                                        shopItemFirework, shopItemBanner)));
+                                        shopItemFirework, shopItemBanner, shopItemMap)));
                     } catch (Exception e) {
                         items.add(i, new ShopItem(itemStack.getType().name(), itemStack.getAmount(), -1,
                                 new Meta(itemStack.getItemMeta().getDisplayName(), itemStack.getItemMeta().getLore(),
                                         enchantments, storedEnchantments, mainPotion, potionEffects, shopItemBook,
-                                        shopItemFirework, shopItemBanner)));
+                                        shopItemFirework, shopItemBanner, shopItemMap)));
                     }
                 } else {
                     items.add(null);

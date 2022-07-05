@@ -1,6 +1,6 @@
 package ru.dvdishka.bank.shop.shopHandlers;
 
-import ru.dvdishka.bank.shop.Classes.shop.Shop;
+import ru.dvdishka.bank.shop.Classes.Shop;
 import ru.dvdishka.bank.common.CommonVariables;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

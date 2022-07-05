@@ -3,8 +3,8 @@ package ru.dvdishka.bank.shop.shopHandlers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ru.dvdishka.bank.blancville.Classes.Card;
-import ru.dvdishka.bank.shop.Classes.shop.PlayerCard;
-import ru.dvdishka.bank.shop.Classes.shop.Shop;
+import ru.dvdishka.bank.shop.Classes.PlayerCard;
+import ru.dvdishka.bank.shop.Classes.Shop;
 import ru.dvdishka.bank.common.CommonVariables;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -85,7 +85,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 }
                 adminBufferedReader.close();
                 adminFileReader.close();
-                Card adminCard = gson.fromJson(json, Card.class);
+                Card adminCard = gson.fromJson(adminJson, Card.class);
                 adminCard.setMoney(adminCard.getMoney() + 10);
                 FileWriter adminFileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/111111.json");
                 adminFileWriter.write(gson.toJson(adminCard));

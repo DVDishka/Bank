@@ -1,16 +1,12 @@
 package ru.dvdishka.bank;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.bukkit.block.banner.Pattern;
-import org.bukkit.block.banner.PatternType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import ru.dvdishka.bank.shop.Classes.shop.Shop;
-import ru.dvdishka.bank.shop.Classes.shop.ShopItem;
+import ru.dvdishka.bank.shop.Classes.Shop;
+import ru.dvdishka.bank.shop.Classes.ShopItem;
 import ru.dvdishka.bank.common.CommonVariables;
 import ru.dvdishka.bank.blancville.Classes.JsonPrices;
 import ru.dvdishka.bank.blancville.Classes.Prices;
@@ -19,19 +15,12 @@ import ru.dvdishka.bank.shop.shopHandlers.EventHandler;
 import ru.dvdishka.bank.blancville.blancvilleHandlers.TabCompleter;
 import org.bukkit.*;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionType;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
 
 public final class Bank extends JavaPlugin {
@@ -69,17 +58,27 @@ public final class Bank extends JavaPlugin {
         } else {
             try {
                 FileConfiguration config = YamlConfiguration.loadConfiguration(new File("plugins/Bank/shops.yml"));
-                CommonVariables.shops = (HashSet<Shop>) config.get("Shops");
+                CommonVariables.shops = (ArrayList<Shop>) config.get("Shops");
                 if (CommonVariables.shops != null) {
                     for (Shop shop : CommonVariables.shops) {
-                        Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName());
                         int i = 0;
-                        for (ShopItem shopItem : shop.getItems()) {
-                            inventory.setItem(i, shopItem.getItem());
-                            i++;
+                        if (shop != null) {
+                            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName());
+                            for (ShopItem shopItem : shop.getItems()) {
+                                if (shopItem != null) {
+                                    inventory.setItem(i, shopItem.getItem());
+                                } else {
+                                    inventory.setItem(i, null);
+                                }
+                                i++;
+                            }
+                            CommonVariables.shopsInventories.put(shop.getName(), inventory);
+                        } else {
+                            CommonVariables.shops.remove(i);
                         }
-                        CommonVariables.shopsInventories.put(shop.getName(), inventory);
                     }
+                } else {
+                    CommonVariables.shops = new ArrayList<>();
                 }
             } catch (Exception e) {
                 CommonVariables.logger.warning(e.getMessage());
@@ -165,6 +164,25 @@ public final class Bank extends JavaPlugin {
             CommonVariables.logger.warning("Can not write prices.json file");
         }
 
+        for (Map.Entry <String, Inventory> inventory : CommonVariables.shopsInventories.entrySet()) {
+            for (int i = 0; i < CommonVariables.shops.size(); i++) {
+                if (inventory.getKey().equals(CommonVariables.shops.get(i).getName())) {
+                    Shop shop = CommonVariables.shops.get(i);
+                    ArrayList<ShopItem> shopItems = new ArrayList<>();
+                    for (ItemStack item : inventory.getValue()) {
+                        int price = -1;
+                        try {
+                            price = Integer.parseInt(item.getLore().get(item.getLore().size() - 1));
+                        } catch (Exception ignored) {}
+                        shopItems.add(new ShopItem(item, price));
+                        CommonVariables.shops.set(i, shop);
+                    }
+                    shop.setItems(shopItems);
+                    CommonVariables.shops.set(i, shop);
+                }
+            }
+        }
+
         FileConfiguration config = new YamlConfiguration();
         config.set("Shops", CommonVariables.shops);
         try {
@@ -173,16 +191,6 @@ public final class Bank extends JavaPlugin {
             CommonVariables.logger.warning("Something went wrong while trying to write shops.yml file");
         }
 
-        try {
-            File shopsFile = new File("plugins/Bank/shops.json");
-            GsonBuilder gsonBuilder = new GsonBuilder();
-            Gson gson = gsonBuilder.setPrettyPrinting().serializeNulls().create();
-            FileWriter fileWriter = new FileWriter(shopsFile);
-            fileWriter.write(gson.toJson(CommonVariables.shops));
-            fileWriter.close();
-        } catch (Exception e) {
-            CommonVariables.logger.warning("Can not write shops.json file");
-        }
         CommonVariables.logger.info("Bank plugin has been disabled!");
     }
 }

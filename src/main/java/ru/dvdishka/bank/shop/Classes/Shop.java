@@ -1,12 +1,10 @@
-package ru.dvdishka.bank.shop.Classes.shop;
+package ru.dvdishka.bank.shop.Classes;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.jetbrains.annotations.NotNull;
 import ru.dvdishka.bank.common.CommonVariables;
 
-import java.io.Serializable;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,7 +85,7 @@ public class Shop implements ConfigurationSerializable {
         return map;
     }
 
-    public Shop deserialize(Map<String, Object> map) {
+    public static Shop deserialize(Map<String, Object> map) {
         String name = (String) map.get("name");
         String owner = (String) map.get("owner");
         ArrayList<ShopItem> items = (ArrayList<ShopItem>) map.get("items");

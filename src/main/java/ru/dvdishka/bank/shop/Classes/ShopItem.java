@@ -1,4 +1,4 @@
-package ru.dvdishka.bank.shop.Classes.shop;
+package ru.dvdishka.bank.shop.Classes;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -43,8 +43,8 @@ public class ShopItem implements ConfigurationSerializable {
         return map;
     }
 
-    public ShopItem deserialize(Map<String, Object> map) {
-        ItemStack item = ItemStack.deserialize((HashMap<String, Object>) map.get("item"));
+    public static ShopItem deserialize(Map<String, Object> map) {
+        ItemStack item = (ItemStack) map.get("item");
         int price = (int) map.get("price");
         return new ShopItem(item, price);
     }

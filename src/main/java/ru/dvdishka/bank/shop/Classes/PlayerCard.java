@@ -1,4 +1,4 @@
-package ru.dvdishka.bank.shop.Classes.shop;
+package ru.dvdishka.bank.shop.Classes;
 
 import java.io.Serializable;
 

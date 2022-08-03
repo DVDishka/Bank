@@ -1,7 +1,9 @@
 package ru.dvdishka.bank.shop.shopHandlers;
 
+import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.kyori.adventure.title.TitlePart;
 import ru.dvdishka.bank.blancville.Classes.Card;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
@@ -22,6 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.List;
+import java.util.Map;
 
 public class CommandExecutor implements org.bukkit.command.CommandExecutor {
     @Override
@@ -199,7 +202,8 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 }
             }
             CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1).setItemMeta(meta);
-            sender.sendMessage("Price for item has been set");
+            player.sendTitle(Title.builder().title(ChatColor.DARK_GREEN + shop.getName()).subtitle(ChatColor.GOLD +
+                    "price has been set").build());
             return true;
         }
 
@@ -227,7 +231,45 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             shop.setCardNumber(cardNumber);
-            sender.sendMessage("Shop card number has been set!");
+            player.sendTitle(Title.builder()
+                    .title(ChatColor.DARK_GREEN + shop.getName())
+                            .subtitle(ChatColor.GOLD + "card number has been set")
+                    .build());
+            return true;
+        }
+
+        if (commandName.equals("edit") && args.length == 4 && args[2].equals("name")) {
+
+            String name = args[3];
+            Shop shop = Shop.getShop(args[1]);
+            if (shop == null) {
+                sender.sendMessage(ChatColor.RED + "There is no shop with that name!");
+                return false;
+            }
+            if (!shop.getOwner().equals(player.getName())) {
+                sender.sendMessage(ChatColor.RED + "You are not the owner of this shop!");
+                return false;
+            }
+            for (Shop checkShop : CommonVariables.shops) {
+                if (checkShop.getName().equals(name)) {
+                    sender.sendMessage(ChatColor.RED + "A shop with the same name already exists!");
+                    return false;
+                }
+            }
+            Inventory inventory = CommonVariables.shopsInventories.get(shop.getName());
+            Inventory newInventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name);
+            newInventory.setContents(inventory.getContents());
+            CommonVariables.shopsInventories.remove(shop.getName());
+            CommonVariables.shopsInventories.put(name, newInventory);
+            for (Shop checkShop : CommonVariables.shops) {
+                if (checkShop.getName().equals(shop.getName())) {
+                    checkShop.setName(name);
+                }
+            }
+            player.sendTitle(Title.builder()
+                    .title(ChatColor.DARK_GREEN + name)
+                    .subtitle(ChatColor.GOLD + "Shop name has been set")
+                    .build());
             return true;
         }
 

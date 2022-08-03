@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TabCompleter implements org.bukkit.command.TabCompleter {
@@ -42,6 +43,12 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                         list.add(shop.getName());
                     }
                 }
+                list.sort(new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o1.compareTo(o2);
+                    }
+                });
                 return list;
             }
 
@@ -50,6 +57,12 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 for (Shop shop : CommonVariables.shops) {
                     list.add(shop.getName());
                 }
+                list.sort(new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o1.compareTo(o2);
+                    }
+                });
                 return list;
             }
         }
@@ -57,7 +70,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
         if (args.length == 3) {
 
             if (args[0].equals("edit")) {
-                return List.of("price", "card");
+                return List.of("price", "card", "name");
             }
         }
 

@@ -1,7 +1,10 @@
 package ru.dvdishka.bank.shop.Classes;
 
+import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.entity.Item;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import ru.dvdishka.bank.common.CommonVariables;
 
@@ -16,18 +19,21 @@ public class Shop implements ConfigurationSerializable {
     private String owner;
     private ArrayList<ShopItem> items = new ArrayList<>(27);
     private int cardNumber;
+    private ItemStack icon;
 
-    public Shop(String name, String owner, ArrayList<ShopItem> items, int cardNumber) {
+    public Shop(String name, String owner, ArrayList<ShopItem> items, int cardNumber, ItemStack icon) {
         this.name = name;
         this.owner = owner;
         this.items = items;
         this.cardNumber = cardNumber;
+        this.icon = icon;
     }
 
-    public Shop(String name, String owner, int cardNumber) {
+    public Shop(String name, String owner, int cardNumber, ItemStack icon) {
         this.name = name;
         this.owner = owner;
         this.cardNumber = cardNumber;
+        this.icon = icon;
     }
 
     public String getName() {
@@ -44,6 +50,10 @@ public class Shop implements ConfigurationSerializable {
 
     public int getCardNumber() {
         return this.cardNumber;
+    }
+
+    public ItemStack getIcon() {
+        return this.icon;
     }
 
     public void setName(String name) {
@@ -66,6 +76,10 @@ public class Shop implements ConfigurationSerializable {
         this.cardNumber = cardNumber;
     }
 
+    public void setIcon(ItemStack icon) {
+        this.icon = icon;
+    }
+
     public static Shop getShop(String name) {
         for (Shop shop : CommonVariables.shops) {
             if (shop.getName().equals(name)) {
@@ -82,6 +96,7 @@ public class Shop implements ConfigurationSerializable {
         map.put("owner", owner);
         map.put("items", items);
         map.put("cardNumber", cardNumber);
+        map.put("icon", icon);
         return map;
     }
 
@@ -90,6 +105,7 @@ public class Shop implements ConfigurationSerializable {
         String owner = (String) map.get("owner");
         ArrayList<ShopItem> items = (ArrayList<ShopItem>) map.get("items");
         int cardNumber = (int) map.get("cardNumber");
-        return new Shop(name, owner, items, cardNumber);
+        ItemStack icon = (ItemStack) map.get("icon");
+        return new Shop(name, owner, items, cardNumber, icon);
     }
 }

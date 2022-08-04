@@ -6,7 +6,7 @@
 
     <groupId>dvdishka</groupId>
     <artifactId>bank</artifactId>
-    <version>2.1.0 Snapshot 1</version>
+    <version>2.1.0 Snapshot 2</version>
     <packaging>jar</packaging>
 
     <name>Bank</name>

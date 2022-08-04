@@ -4,6 +4,7 @@ import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.title.TitlePart;
+import org.checkerframework.checker.units.qual.A;
 import ru.dvdishka.bank.blancville.Classes.Card;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
@@ -23,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +38,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
         }
         Player player = Bukkit.getPlayer(sender.getName());
         String commandName = args[0];
+        assert player != null;
 
         if (commandName.equals("create") && args.length == 2) {
             File cardFile = new File("plugins/Bank/Cards/" + player.getName() + ".json");
@@ -105,7 +108,11 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     return false;
                 }
             }
-            Shop shop = new Shop(args[1], player.getName(), number);
+            ItemStack icon = new ItemStack(Material.BARRIER);
+            ItemMeta iconMeta = icon.getItemMeta();
+            iconMeta.setDisplayName(args[1]);
+            icon.setItemMeta(iconMeta);
+            Shop shop = new Shop(args[1], player.getName(), number, icon);
             CommonVariables.shops.add(shop);
             CommonVariables.shopsInventories.put(shop.getName(),
                     Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName()));
@@ -114,40 +121,59 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             return true;
         }
 
-        if (commandName.equals("open") && args.length == 2) {
+        if (commandName.equals("open") && args.length == 1) {
 
-            Shop shop = Shop.getShop(args[1]);
-            if (shop == null) {
-                sender.sendMessage(ChatColor.RED + "There is no shop with that name!");
+            ArrayList<Inventory> shopsIcons = new ArrayList<>();
+            int shopsAmount = CommonVariables.shops.size();
+            if (shopsAmount == 0) {
+                sender.sendMessage(ChatColor.RED + "There are no shops yet");
                 return false;
             }
-
-            Inventory shopInventory = CommonVariables.shopsInventories.get(shop.getName());
-            if (!shop.getOwner().equals(player.getName())) {
-                int i = 0;
-                for (ItemStack itemStack : shopInventory) {
-                    if (itemStack == null || itemStack.getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-                        ItemStack newItemStack = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, 1);
-                        shopInventory.setItem(i, newItemStack);
-                    }
-                    i++;
-                }
-            } else {
-                int i = 0;
-                for (ItemStack itemStack : shopInventory) {
-                    if (itemStack != null) {
-                        if (itemStack.getType() == Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-                            shopInventory.setItem(i, null);
-                        }
-                    }
-                    i++;
-                }
+            int i = 1;
+            while (shopsAmount > 0) {
+                Inventory page = Bukkit.createInventory(null, 27, ChatColor.GOLD + "Shops " + i);
+                ItemStack prevPage = new ItemStack(Material.ARROW);
+                ItemStack nextPage = new ItemStack(Material.ARROW);
+                ItemMeta prevPageMeta = prevPage.getItemMeta();
+                prevPageMeta.setDisplayName("<--");
+                prevPage.setItemMeta(prevPageMeta);
+                ItemMeta nextPageMeta = nextPage.getItemMeta();
+                nextPageMeta.setDisplayName("-->");
+                nextPage.setItemMeta(nextPageMeta);
+                page.setItem(18, prevPage);
+                page.setItem(26, nextPage);
+                shopsIcons.add(page);
+                shopsAmount -= 25;
+                i++;
             }
-            player.openInventory(shopInventory);
+            int stackIndex = 0;
+            int inventoryIndex = 0;
+            for (Shop shop : CommonVariables.shops) {
+                if (stackIndex == 18) {
+                    stackIndex++;
+                }
+                if (stackIndex == 26) {
+                    stackIndex = 0;
+                    inventoryIndex++;
+                }
+                shopsIcons.get(inventoryIndex).setItem(stackIndex, shop.getIcon());
+                stackIndex++;
+            }
+            stackIndex = 0;
+            Inventory lastPage = shopsIcons.get(inventoryIndex);
+            for (ItemStack itemStack : lastPage) {
+                if (itemStack == null) {
+                    lastPage.setItem(stackIndex, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                }
+                stackIndex++;
+            }
+            shopsIcons.set(inventoryIndex, lastPage);
+            CommonVariables.shopMenu = shopsIcons;
+            player.openInventory(shopsIcons.get(0));
             return true;
         }
 
-        if (commandName.equals("edit") && args.length == 6 && args[2].equals("price") && args[3].equals("set")) {
+        if (commandName.equals("edit") && args.length == 5 && args[2].equals("price")) {
 
             int index = 0;
             int price = 0;
@@ -161,7 +187,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             try {
-                index = Integer.parseInt(args[4]);
+                index = Integer.parseInt(args[3]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Index must be a number!");
                 return false;
@@ -171,7 +197,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             try {
-                price = Integer.parseInt(args[5]);
+                price = Integer.parseInt(args[4]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Price must be a number!");
                 return false;
@@ -207,7 +233,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             return true;
         }
 
-        if (commandName.equals("edit") && args.length == 5 && args[2].equals("card") && args[3].equals("set")) {
+        if (commandName.equals("edit") && args.length == 4 && args[2].equals("card")) {
 
             int cardNumber = 0;
             Shop shop = Shop.getShop(args[1]);
@@ -220,7 +246,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             try {
-                cardNumber = Integer.parseInt(args[4]);
+                cardNumber = Integer.parseInt(args[3]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Card must be a number!");
                 return false;
@@ -264,6 +290,11 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             for (Shop checkShop : CommonVariables.shops) {
                 if (checkShop.getName().equals(shop.getName())) {
                     checkShop.setName(name);
+                    ItemStack icon = checkShop.getIcon();
+                    ItemMeta iconMeta = icon.getItemMeta();
+                    iconMeta.setDisplayName(checkShop.getName());
+                    icon.setItemMeta(iconMeta);
+                    checkShop.setIcon(icon);
                 }
             }
             player.sendTitle(Title.builder()
@@ -273,7 +304,100 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             return true;
         }
 
-        sender.sendMessage(ChatColor.RED + "Unknown command or wrong answers!");
+        if (commandName.equals("edit") && args.length == 3 && args[2].equals("icon")) {
+
+            Shop shop = Shop.getShop(args[1]);
+            if (shop == null) {
+                sender.sendMessage(ChatColor.RED + "There is no shop with that name!");
+                return false;
+            }
+            if (!shop.getOwner().equals(sender.getName())) {
+                sender.sendMessage(ChatColor.RED + "You are not owner of this shop!");
+                return false;
+            }
+
+            int iconsAmount = Material.values().length - 2;
+            if (iconsAmount == 0) {
+                sender.sendMessage(ChatColor.RED + "There are no icons yet");
+                return false;
+            }
+
+            ArrayList<Inventory> icons = new ArrayList<>();
+
+            int i = 1;
+            while (iconsAmount > 0) {
+                Inventory page = Bukkit.createInventory(null, 54, ChatColor.GOLD + "Icons " + i);
+                ItemStack prevPage = new ItemStack(Material.ARROW);
+                ItemStack nextPage = new ItemStack(Material.ARROW);
+                ItemMeta prevPageMeta = prevPage.getItemMeta();
+                prevPageMeta.setDisplayName("<--");
+                prevPage.setItemMeta(prevPageMeta);
+                ItemMeta nextPageMeta = nextPage.getItemMeta();
+                nextPageMeta.setDisplayName("-->");
+                nextPage.setItemMeta(nextPageMeta);
+                page.setItem(45, prevPage);
+                page.setItem(53, nextPage);
+                icons.add(page);
+                iconsAmount -= 52;
+                i++;
+            }
+
+            int stackIndex = 0;
+            int inventoryIndex = 0;
+            for (Material icon : Material.values()) {
+                if (!icon.equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE) && !icon.equals(Material.AIR)) {
+                    if (stackIndex == 45) {
+                        stackIndex++;
+                    }
+                    if (stackIndex == 53) {
+                        stackIndex = 0;
+                        inventoryIndex++;
+                    }
+                    icons.get(inventoryIndex).setItem(stackIndex, new ItemStack(icon));
+                    stackIndex++;
+                }
+            }
+
+            ItemStack prevPage = new ItemStack(Material.ARROW);
+            ItemStack nextPage = new ItemStack(Material.ARROW);
+            ItemMeta prevPageMeta = prevPage.getItemMeta();
+            prevPageMeta.setDisplayName("<--");
+            prevPage.setItemMeta(prevPageMeta);
+            ItemMeta nextPageMeta = nextPage.getItemMeta();
+            nextPageMeta.setDisplayName("-->");
+            nextPage.setItemMeta(nextPageMeta);
+
+            int pagesAmount = icons.size();
+            for (int page = 0; page < pagesAmount; page++) {
+                boolean isClear = true;
+                for (ItemStack item : icons.get(page)) {
+                    if (item != null && !item.equals(nextPage) && !item.equals(prevPage)) {
+                        isClear = false;
+                        break;
+                    }
+                }
+                if (isClear) {
+                    icons.remove(page);
+                    pagesAmount--;
+                    page--;
+                }
+            }
+            stackIndex = 0;
+            Inventory lastPage = icons.get(icons.size() - 1);
+            for (ItemStack itemStack : lastPage) {
+                if (itemStack == null) {
+                    lastPage.setItem(stackIndex, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                }
+                stackIndex++;
+            }
+            icons.set(icons.size() - 1, lastPage);
+            player.openInventory(icons.get(0));
+            CommonVariables.playerShopIconChoose.put(player.getName(), shop.getName());
+            CommonVariables.iconMenu = icons;
+            return true;
+        }
+
+        sender.sendMessage(ChatColor.RED + "Unknown command or wrong arguments!");
         return false;
     }
 }

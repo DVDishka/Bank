@@ -13,4 +13,7 @@ public class CommonVariables {
     public static Logger logger = Bukkit.getLogger();
     public static ArrayList<Shop> shops = new ArrayList<>();
     public static HashMap<String, Inventory> shopsInventories = new HashMap<>();
+    public static ArrayList<Inventory> shopMenu = new ArrayList<>();
+    public static ArrayList<Inventory> iconMenu = new ArrayList<>();
+    public static HashMap<String, String> playerShopIconChoose = new HashMap<>();
 }

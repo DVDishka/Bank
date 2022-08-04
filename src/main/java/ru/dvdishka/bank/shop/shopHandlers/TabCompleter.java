@@ -51,50 +51,29 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 });
                 return list;
             }
-
-            else if (args[0].equals("open")) {
-                ArrayList<String> list = new ArrayList<>();
-                for (Shop shop : CommonVariables.shops) {
-                    list.add(shop.getName());
-                }
-                list.sort(new Comparator<String>() {
-                    @Override
-                    public int compare(String o1, String o2) {
-                        return o1.compareTo(o2);
-                    }
-                });
-                return list;
-            }
         }
 
         if (args.length == 3) {
 
             if (args[0].equals("edit")) {
-                return List.of("price", "card", "name");
+                return List.of("price", "card", "name", "icon");
             }
         }
 
         if (args.length == 4) {
 
-            if (args[0].equals("edit") && args[2].equals("price") || args[0].equals("edit") && args[2].equals("card")) {
-                return List.of("set");
+            if (args[0].equals("edit") && args[2].equals("price")) {
+                return List.of("index");
+            }
+
+            if (args[0].equals("edit") && args[2].equals("card")) {
+                return List.of("cardNumber");
             }
         }
 
         if (args.length == 5) {
 
-            if (args[0].equals("edit") && args[2].equals("price") && args[3].equals("set")) {
-                return List.of("index");
-            }
-
-            if (args[0].equals("edit") && args[2].equals("card") && args[3].equals("set")) {
-                return List.of("cardNumber");
-            }
-        }
-
-        if (args.length == 6) {
-
-            if (args[0].equals("edit") && args[2].equals("price") && args[3].equals("set")) {
+            if (args[0].equals("edit") && args[2].equals("price")) {
                 return List.of("price");
             }
         }

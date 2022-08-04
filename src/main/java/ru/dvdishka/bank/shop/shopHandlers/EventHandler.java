@@ -1,7 +1,12 @@
 package ru.dvdishka.bank.shop.shopHandlers;
 
+import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import ru.dvdishka.bank.blancville.Classes.Card;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
@@ -22,7 +27,7 @@ import java.util.List;
 public class EventHandler implements Listener {
 
     @org.bukkit.event.EventHandler
-    public void inventoryClickEventHandler(InventoryClickEvent event) {
+    public void onShopInventoryClick(InventoryClickEvent event) {
 
         for (Shop shop : CommonVariables.shops) {
             if (!shop.getOwner().equals(event.getWhoClicked().getName()) &&
@@ -198,6 +203,117 @@ public class EventHandler implements Listener {
                     }
                 }
             }
+        }
+    }
+
+    @org.bukkit.event.EventHandler
+    public void onShopMenuInventoryClick(InventoryClickEvent event) {
+
+        int i = 0;
+
+        for (Inventory shopMenuPage : CommonVariables.shopMenu) {
+
+            if (shopMenuPage.equals(event.getClickedInventory())) {
+
+                ItemStack prevPage = new ItemStack(Material.ARROW);
+                ItemStack nextPage = new ItemStack(Material.ARROW);
+                ItemMeta prevPageMeta = prevPage.getItemMeta();
+                ItemMeta nextPageMeta = nextPage.getItemMeta();
+                prevPageMeta.setDisplayName("<--");
+                nextPageMeta.setDisplayName("-->");
+                prevPage.setItemMeta(prevPageMeta);
+                nextPage.setItemMeta(nextPageMeta);
+
+                if (event.getCurrentItem() != null) {
+
+                    if (event.getCurrentItem().equals(prevPage)) {
+                        if (i > 0) {
+                            event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i - 1));
+                        }
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (event.getCurrentItem().equals(nextPage)) {
+                        if (i < CommonVariables.shopMenu.size() - 1) {
+                            event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i + 1));
+                        }
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (event.getCurrentItem().equals(new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE))) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    ItemMeta currentItemMeta = event.getCurrentItem().getItemMeta();
+                    event.getWhoClicked().openInventory(CommonVariables.shopsInventories
+                            .get(currentItemMeta.getDisplayName()));
+                    event.setCancelled(true);
+                    return;
+                }
+                return;
+            }
+            i++;
+        }
+    }
+
+    @org.bukkit.event.EventHandler
+    public void onIconMenuInventoryClick(InventoryClickEvent event) {
+
+        int i = 0;
+
+        for (Inventory iconMenuPage : CommonVariables.iconMenu) {
+
+            if (iconMenuPage.equals(event.getClickedInventory())) {
+
+                ItemStack prevPage = new ItemStack(Material.ARROW);
+                ItemStack nextPage = new ItemStack(Material.ARROW);
+                ItemMeta prevPageMeta = prevPage.getItemMeta();
+                ItemMeta nextPageMeta = nextPage.getItemMeta();
+                prevPageMeta.setDisplayName("<--");
+                nextPageMeta.setDisplayName("-->");
+                prevPage.setItemMeta(prevPageMeta);
+                nextPage.setItemMeta(nextPageMeta);
+
+                if (event.getCurrentItem() != null) {
+
+                    if (event.getCurrentItem().equals(prevPage)) {
+                        if (i > 0) {
+                            event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i - 1));
+                        }
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (event.getCurrentItem().equals(nextPage)) {
+                        if (i < CommonVariables.iconMenu.size() - 1) {
+                            event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i + 1));
+                        }
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    ItemStack icon = new ItemStack(event.getCurrentItem().getType());
+                    if (!icon.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
+                        ItemMeta iconMeta = icon.getItemMeta();
+                        iconMeta.setDisplayName(CommonVariables.playerShopIconChoose.get(event.getWhoClicked().getName()));
+                        icon.setItemMeta(iconMeta);
+                        Shop shop = Shop.getShop(CommonVariables.playerShopIconChoose.get(event.getWhoClicked().getName()));
+                        shop.setIcon(icon);
+                        Player player = (Player) event.getWhoClicked();
+                        player.sendTitle(Title
+                                .builder()
+                                .title(ChatColor.DARK_GREEN + shop.getName())
+                                .subtitle(ChatColor.GOLD + "New icon has been set")
+                                .build());
+                    }
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+            i++;
         }
     }
 }

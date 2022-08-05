@@ -3,8 +3,9 @@ package ru.dvdishka.bank.shop.shopHandlers;
 import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.kyori.adventure.title.TitlePart;
-import org.checkerframework.checker.units.qual.A;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import ru.dvdishka.bank.blancville.Classes.Card;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
@@ -26,7 +27,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class CommandExecutor implements org.bukkit.command.CommandExecutor {
     @Override
@@ -41,9 +41,40 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
         assert player != null;
 
         if (commandName.equals("create") && args.length == 2) {
+
+            String shopName = args[1];
+
+            for (Shop shop : CommonVariables.shops) {
+                if (shop.getName().equals(shopName)) {
+                    sender.sendMessage(ChatColor.RED + "Shop with that name already exists!");
+                    return false;
+                }
+            }
+
+            CommonVariables.playerShopCreating.put(player.getName(), shopName);
+
+            TextComponent text = Component
+                    .text("Creating a shop costs 10 l`argent\n")
+                    .append(Component.text(ChatColor.GREEN + "[CREATE]")
+                    .clickEvent(ClickEvent.runCommand("/shop creating " + shopName + " " + player.getName())))
+                    .append(Component.text("   "))
+                    .append(Component.text(ChatColor.RED + "[CANCEL]")
+                    .clickEvent(ClickEvent.runCommand("/shop creating cancel " + player.getName())));
+            sender.sendMessage(text);
+            return true;
+        }
+
+        if (commandName.equals("creating") && args.length == 3 && !args[1].equals("cancel")) {
+
+            if (CommonVariables.playerShopCreating.get(args[2]) == null ||
+                    !CommonVariables.playerShopCreating.get(args[2]).equals(args[1])) {
+                return false;
+            }
+
+            player = Bukkit.getPlayer(args[2]);
             File cardFile = new File("plugins/Bank/Cards/" + player.getName() + ".json");
             if (!cardFile.exists()) {
-                sender.sendMessage(ChatColor.RED + "You have no card!");
+                player.sendMessage(ChatColor.RED + "You have no card!");
                 return false;
             }
             int number = 0;
@@ -73,7 +104,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 playerFileReader.close();
                 Card card = gson.fromJson(playerJson, Card.class);
                 if (card.getMoney() < 10) {
-                    sender.sendMessage(ChatColor.RED + "You does not have 10 l`argent!");
+                    player.sendMessage(ChatColor.RED + "You does not have 10 l`argent!");
                     return false;
                 }
                 card.setMoney(card.getMoney() - 10);
@@ -98,13 +129,13 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 adminFileWriter.close();
             } catch (Exception e) {
                 CommonVariables.logger.warning(e.getMessage());
-                sender.sendMessage(ChatColor.RED + "Something went wrong!");
+                player.sendMessage(ChatColor.RED + "Something went wrong!");
                 return false;
             }
 
             for (Shop checkShop : CommonVariables.shops) {
                 if (checkShop.getName().equals(args[1])) {
-                    sender.sendMessage(ChatColor.RED + "There is already a shop with the same name!");
+                    player.sendMessage(ChatColor.RED + "There is already a shop with the same name!");
                     return false;
                 }
             }
@@ -116,8 +147,24 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             CommonVariables.shops.add(shop);
             CommonVariables.shopsInventories.put(shop.getName(),
                     Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName()));
+            CommonVariables.playerShopCreating.remove(player.getName());
 
-            sender.sendMessage("Shop " + shop.getName() + " has been created!");
+            player.sendTitle(Title
+                    .builder()
+                    .title(ChatColor.DARK_GREEN + shop.getName())
+                    .subtitle(ChatColor.GOLD + "has been created")
+                    .build());
+            return true;
+        }
+
+        if (commandName.equals("creating") && args.length == 3 && args[1].equals("cancel")) {
+
+            player = Bukkit.getPlayer(args[2]);
+            if (!CommonVariables.playerShopCreating.containsKey(player.getName())) {
+                return false;
+            }
+            CommonVariables.playerShopCreating.remove(player.getName());
+            player.sendMessage(ChatColor.RED + "You cancelled the creation of the shop!");
             return true;
         }
 

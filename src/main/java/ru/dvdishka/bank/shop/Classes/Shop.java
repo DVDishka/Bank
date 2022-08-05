@@ -1,10 +1,12 @@
 package ru.dvdishka.bank.shop.Classes;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import ru.dvdishka.bank.common.CommonVariables;
 
@@ -105,7 +107,15 @@ public class Shop implements ConfigurationSerializable {
         String owner = (String) map.get("owner");
         ArrayList<ShopItem> items = (ArrayList<ShopItem>) map.get("items");
         int cardNumber = (int) map.get("cardNumber");
-        ItemStack icon = (ItemStack) map.get("icon");
+        ItemStack icon;
+        if (map.get("icon") == null) {
+            icon = new ItemStack(Material.BARRIER);
+            ItemMeta iconMeta = icon.getItemMeta();
+            iconMeta.setDisplayName(name);
+            icon.setItemMeta(iconMeta);
+        } else {
+            icon = (ItemStack) map.get("icon");
+        }
         return new Shop(name, owner, items, cardNumber, icon);
     }
 }

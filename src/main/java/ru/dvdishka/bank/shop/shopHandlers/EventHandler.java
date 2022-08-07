@@ -4,7 +4,6 @@ import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -68,10 +67,23 @@ public class EventHandler implements Listener {
                         if (event.getCurrentItem().equals(prevPage)) {
 
                             if (i > 0) {
+                                event.getWhoClicked()
+                                        .playSound(Sound
+                                        .sound(
+                                        org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                        Sound.Source.NEUTRAL,
+                                        50, 1));
                                 event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                                         .get(shop.getName()).get(i - 1));
                                 event.setCancelled(true);
                                 return;
+                            } else {
+                                event.getWhoClicked()
+                                        .playSound(Sound
+                                                .sound(
+                                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                        Sound.Source.BLOCK,
+                                                        50, 1));
                             }
                             event.setCancelled(true);
                             return;
@@ -80,10 +92,23 @@ public class EventHandler implements Listener {
                         if (event.getCurrentItem().equals(nextPage)) {
 
                             if (i < CommonVariables.shopsInventories.get(shop.getName()).size() - 1) {
+                                event.getWhoClicked()
+                                        .playSound(Sound
+                                        .sound(
+                                                org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                                Sound.Source.NEUTRAL,
+                                                50, 1));
                                 event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                                         .get(shop.getName()).get(i + 1));
                                 event.setCancelled(true);
                                 return;
+                            } else {
+                                event.getWhoClicked()
+                                        .playSound(Sound
+                                                .sound(
+                                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                        Sound.Source.BLOCK,
+                                                        50, 1));
                             }
                             event.setCancelled(true);
                             return;
@@ -287,7 +312,20 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(prevPage)) {
                         if (i > 0) {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                    .sound(
+                                            org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                            Sound.Source.NEUTRAL,
+                                            50, 1));
                             event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i - 1));
+                        } else {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    Sound.Source.BLOCK,
+                                                    50, 1));
                         }
                         event.setCancelled(true);
                         return;
@@ -295,18 +333,43 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(nextPage)) {
                         if (i < CommonVariables.shopMenu.size() - 1) {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                                    Sound.Source.NEUTRAL,
+                                                    50, 1));
                             event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i + 1));
+                        } else {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    Sound.Source.BLOCK,
+                                                    50, 1));
                         }
                         event.setCancelled(true);
                         return;
                     }
 
                     if (event.getCurrentItem().equals(new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE))) {
+                        event.getWhoClicked()
+                                .playSound(Sound
+                                        .sound(
+                                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                Sound.Source.BLOCK,
+                                                50, 1));
                         event.setCancelled(true);
                         return;
                     }
 
                     ItemMeta currentItemMeta = event.getCurrentItem().getItemMeta();
+                    event.getWhoClicked()
+                            .playSound(Sound
+                                    .sound(
+                                            org.bukkit.Sound.UI_BUTTON_CLICK,
+                                            Sound.Source.NEUTRAL,
+                                            50, 1));
                     event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                             .get(currentItemMeta.getDisplayName()).get(0));
                     event.setCancelled(true);
@@ -340,7 +403,20 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(prevPage)) {
                         if (i > 0) {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                                    Sound.Source.NEUTRAL,
+                                                    50, 1));
                             event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i - 1));
+                        } else {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    Sound.Source.BLOCK,
+                                                    50, 1));
                         }
                         event.setCancelled(true);
                         return;
@@ -348,7 +424,20 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(nextPage)) {
                         if (i < CommonVariables.iconMenu.size() - 1) {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                                    Sound.Source.NEUTRAL,
+                                                    50, 1));
                             event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i + 1));
+                        } else {
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    Sound.Source.BLOCK,
+                                                    50, 1));
                         }
                         event.setCancelled(true);
                         return;
@@ -356,6 +445,12 @@ public class EventHandler implements Listener {
 
                     ItemStack icon = new ItemStack(event.getCurrentItem().getType());
                     if (!icon.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
+                        event.getWhoClicked()
+                                .playSound(Sound
+                                        .sound(
+                                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                                Sound.Source.NEUTRAL,
+                                                50, 1));
                         ItemMeta iconMeta = icon.getItemMeta();
                         iconMeta.setDisplayName(CommonVariables.playerShopIconChoose.get(event.getWhoClicked().getName()));
                         icon.setItemMeta(iconMeta);
@@ -368,6 +463,13 @@ public class EventHandler implements Listener {
                                 .subtitle(ChatColor.GOLD + "New icon has been set")
                                 .build());
                         player.closeInventory();
+                    } else {
+                        event.getWhoClicked()
+                                .playSound(Sound
+                                        .sound(
+                                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                Sound.Source.BLOCK,
+                                                50, 1));
                     }
                     event.setCancelled(true);
                     return;
@@ -404,6 +506,12 @@ public class EventHandler implements Listener {
                             inventory.setItem(18, prevPage);
                             inventory.setItem(26, nextPage);
                             CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
+                            event.getWhoClicked()
+                                    .playSound(Sound
+                                            .sound(
+                                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                                    Sound.Source.NEUTRAL,
+                                                    50, 1));
                             event.setCancelled(true);
                         } else {
                             event.getWhoClicked().closeInventory();

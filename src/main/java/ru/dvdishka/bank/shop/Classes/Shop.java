@@ -5,12 +5,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
+import ru.dvdishka.bank.backwardsCompatibility.ShopItem;
 import ru.dvdishka.bank.common.CommonVariables;
 
 import java.util.ArrayList;
@@ -113,18 +112,6 @@ public class Shop implements ConfigurationSerializable {
         String name = (String) map.get("name");
         String owner = (String) map.get("owner");
         ArrayList<ArrayList<ItemStack>> contents = (ArrayList<ArrayList<ItemStack>>) map.get("items");
-        int i = 1;
-        ArrayList<Inventory> items = new ArrayList<>();
-        for (ArrayList<ItemStack> item : contents) {
-            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name + " " + i);
-            int index = 0;
-            for (ItemStack itemStack : item) {
-                inventory.setItem(index, itemStack);
-                index++;
-            }
-            items.add(inventory);
-            i++;
-        }
         int cardNumber = (int) map.get("cardNumber");
         ItemStack icon;
         if (map.get("icon") == null) {
@@ -135,6 +122,46 @@ public class Shop implements ConfigurationSerializable {
         } else {
             icon = (ItemStack) map.get("icon");
         }
-        return new Shop(name, owner, items, cardNumber, icon);
+        try {
+
+            int i = 1;
+            ArrayList<Inventory> items = new ArrayList<>();
+            for (ArrayList<ItemStack> item : contents) {
+                Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name + " " + i);
+                int index = 0;
+                for (ItemStack itemStack : item) {
+                    inventory.setItem(index, itemStack);
+                    index++;
+                }
+                items.add(inventory);
+                i++;
+            }
+            return new Shop(name, owner, items, cardNumber, icon);
+        } catch (Exception e) {
+            ArrayList<Inventory> items = new ArrayList<>();
+            ArrayList<ShopItem> oldItems = (ArrayList<ShopItem>) map.get("items");
+            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name + " 1");
+            int i = 0;
+            for (ShopItem shopItem : oldItems) {
+                if (shopItem != null) {
+                    inventory.setItem(i, shopItem.getItem());
+                } else {
+                    inventory.setItem(i, null);
+                }
+                i++;
+            }
+            ItemStack prevPage = new ItemStack(Material.ARROW);
+            ItemStack nextPage = new ItemStack(Material.ARROW);
+            ItemMeta prevPageMeta = prevPage.getItemMeta();
+            prevPageMeta.setDisplayName("<--");
+            prevPage.setItemMeta(prevPageMeta);
+            ItemMeta nextPageMeta = nextPage.getItemMeta();
+            nextPageMeta.setDisplayName("-->");
+            nextPage.setItemMeta(nextPageMeta);
+            inventory.setItem(18, prevPage);
+            inventory.setItem(26, nextPage);
+            items.add(inventory);
+            return new Shop(name, owner, items, cardNumber, icon);
+        }
     }
 }

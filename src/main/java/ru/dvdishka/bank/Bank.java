@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.inventory.meta.ItemMeta;
+import ru.dvdishka.bank.backwardsCompatibility.ShopItem;
 import ru.dvdishka.bank.shop.Classes.Shop;
 import ru.dvdishka.bank.common.CommonVariables;
 import ru.dvdishka.bank.blancville.Classes.JsonPrices;
@@ -16,18 +16,17 @@ import ru.dvdishka.bank.blancville.blancvilleHandlers.TabCompleter;
 import org.bukkit.*;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public final class Bank extends JavaPlugin {
 
     static {
         ConfigurationSerialization.registerClass(Shop.class, "Shop");
+        ConfigurationSerialization.registerClass(ShopItem.class, "ShopItem");
     }
 
     @Override
@@ -154,7 +153,6 @@ public final class Bank extends JavaPlugin {
         } catch (Exception e) {
             CommonVariables.logger.warning("Something went wrong while trying to write shops.yml file");
         }
-
         CommonVariables.logger.info("Bank plugin has been disabled!");
     }
 }

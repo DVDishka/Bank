@@ -145,8 +145,20 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             icon.setItemMeta(iconMeta);
             Shop shop = new Shop(args[1], player.getName(), number, icon);
             CommonVariables.shops.add(shop);
-            CommonVariables.shopsInventories.put(shop.getName(),
-                    Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName()));
+            ArrayList<Inventory> pages = new ArrayList<>();
+            ItemStack prevPage = new ItemStack(Material.ARROW);
+            ItemStack nextPage = new ItemStack(Material.ARROW);
+            ItemMeta prevPageMeta = prevPage.getItemMeta();
+            prevPageMeta.setDisplayName("<--");
+            prevPage.setItemMeta(prevPageMeta);
+            ItemMeta nextPageMeta = nextPage.getItemMeta();
+            nextPageMeta.setDisplayName("-->");
+            nextPage.setItemMeta(nextPageMeta);
+            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName() + " 1");
+            inventory.setItem(18, prevPage);
+            inventory.setItem(26, nextPage);
+            pages.add(inventory);
+            CommonVariables.shopsInventories.put(shop.getName(), pages);
             CommonVariables.playerShopCreating.remove(player.getName());
 
             player.sendTitle(Title
@@ -220,8 +232,9 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             return true;
         }
 
-        if (commandName.equals("edit") && args.length == 5 && args[2].equals("price")) {
+        if (commandName.equals("edit") && args.length == 6 && args[2].equals("price")) {
 
+            int page = 0;
             int index = 0;
             int price = 0;
             Shop shop = Shop.getShop(args[1]);
@@ -234,7 +247,13 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             try {
-                index = Integer.parseInt(args[3]);
+                page = Integer.parseInt(args[3]);
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED + "Page must be a number");
+                return false;
+            }
+            try {
+                index = Integer.parseInt(args[4]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Index must be a number!");
                 return false;
@@ -244,7 +263,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             try {
-                price = Integer.parseInt(args[4]);
+                price = Integer.parseInt(args[5]);
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Price must be a number!");
                 return false;
@@ -253,13 +272,13 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Price must be > 0!");
                 return false;
             }
-            if (CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1) == null ||
-                    CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1).getType() ==
+            if (CommonVariables.shopsInventories.get(shop.getName()).get(page - 1).getItem(index - 1) == null ||
+                    CommonVariables.shopsInventories.get(shop.getName()).get(page).getItem(index - 1).getType() ==
                             Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
                 sender.sendMessage(ChatColor.RED + "There is no item in this slot!");
                 return false;
             }
-            ItemMeta meta = CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1).getItemMeta();
+            ItemMeta meta = CommonVariables.shopsInventories.get(shop.getName()).get(page).getItem(index - 1).getItemMeta();
             try {
                 Integer.parseInt(meta.getLore().get(meta.getLore().size() - 1));
                 List<String> list = meta.getLore();
@@ -274,7 +293,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     meta.setLore(List.of(String.valueOf(price)));
                 }
             }
-            CommonVariables.shopsInventories.get(shop.getName()).getItem(index - 1).setItemMeta(meta);
+            CommonVariables.shopsInventories.get(shop.getName()).get(page).getItem(index - 1).setItemMeta(meta);
             player.sendTitle(Title.builder().title(ChatColor.DARK_GREEN + shop.getName()).subtitle(ChatColor.GOLD +
                     "price has been set").build());
             return true;
@@ -329,11 +348,17 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     return false;
                 }
             }
-            Inventory inventory = CommonVariables.shopsInventories.get(shop.getName());
-            Inventory newInventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name);
-            newInventory.setContents(inventory.getContents());
+            ArrayList<Inventory> shopInventory = CommonVariables.shopsInventories.get(shop.getName());
+            ArrayList<Inventory> newShopInventory = new ArrayList<>();
+            int i = 1;
+            for (Inventory inventory : shopInventory) {
+                Inventory newInventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name + " " + i);
+                newInventory.setContents(inventory.getContents());
+                newShopInventory.add(newInventory);
+                i++;
+            }
             CommonVariables.shopsInventories.remove(shop.getName());
-            CommonVariables.shopsInventories.put(name, newInventory);
+            CommonVariables.shopsInventories.put(name, newShopInventory);
             for (Shop checkShop : CommonVariables.shops) {
                 if (checkShop.getName().equals(shop.getName())) {
                     checkShop.setName(name);
@@ -441,6 +466,29 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             player.openInventory(icons.get(0));
             CommonVariables.playerShopIconChoose.put(player.getName(), shop.getName());
             CommonVariables.iconMenu = icons;
+            return true;
+        }
+
+        if (commandName.equals("upgrade") && args.length == 2) {
+
+            Shop shop = Shop.getShop(args[1]);
+            if (shop == null) {
+                sender.sendMessage(ChatColor.RED + "There is no shop with that name!");
+                return false;
+            }
+            if (!shop.getOwner().equals(sender.getName())) {
+                sender.sendMessage(ChatColor.RED + "You are not the owner of this shop!");
+                return false;
+            }
+            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + "Upgrade");
+            ItemStack newPage = new ItemStack(Material.PAPER);
+            ItemMeta newPageMeta = newPage.getItemMeta();
+            newPageMeta.setDisplayName("New page");
+            newPage.setItemMeta(newPageMeta);
+            inventory.setItem(13, newPage);
+            CommonVariables.upgradeMenu = inventory;
+            CommonVariables.playerShopUpgrade.put(sender.getName(), shop.getName());
+            player.openInventory(inventory);
             return true;
         }
 

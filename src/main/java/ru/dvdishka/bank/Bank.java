@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.inventory.meta.ItemMeta;
 import ru.dvdishka.bank.shop.Classes.Shop;
-import ru.dvdishka.bank.shop.Classes.ShopItem;
 import ru.dvdishka.bank.common.CommonVariables;
 import ru.dvdishka.bank.blancville.Classes.JsonPrices;
 import ru.dvdishka.bank.blancville.Classes.Prices;
@@ -21,13 +21,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public final class Bank extends JavaPlugin {
 
     static {
         ConfigurationSerialization.registerClass(Shop.class, "Shop");
-        ConfigurationSerialization.registerClass(ShopItem.class, "ShopItem");
     }
 
     @Override
@@ -59,30 +59,13 @@ public final class Bank extends JavaPlugin {
             try {
                 FileConfiguration config = YamlConfiguration.loadConfiguration(new File("plugins/Bank/shops.yml"));
                 CommonVariables.shops = (ArrayList<Shop>) config.get("Shops");
-                if (CommonVariables.shops != null) {
-                    for (Shop shop : CommonVariables.shops) {
-                        int i = 0;
-                        if (shop != null) {
-                            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + shop.getName());
-                            for (ShopItem shopItem : shop.getItems()) {
-                                if (shopItem != null) {
-                                    inventory.setItem(i, shopItem.getItem());
-                                } else {
-                                    inventory.setItem(i, null);
-                                }
-                                i++;
-                            }
-                            CommonVariables.shopsInventories.put(shop.getName(), inventory);
-                        } else {
-                            CommonVariables.shops.remove(i);
-                        }
-                    }
-                } else {
-                    CommonVariables.shops = new ArrayList<>();
+                HashMap<String, ArrayList<Inventory>> shopsInventories = new HashMap<>();
+                for (Shop shop : CommonVariables.shops) {
+                    shopsInventories.put(shop.getName(), shop.getItems());
                 }
+                CommonVariables.shopsInventories = shopsInventories;
             } catch (Exception e) {
-                CommonVariables.logger.warning(e.getMessage());
-                CommonVariables.logger.warning("Something went wrong while trying to read shops.yml file!");
+                CommonVariables.logger.warning("Something went wrong while trying to read shops.yml");
             }
         }
         if (!pricesFile.exists()) {
@@ -164,29 +147,10 @@ public final class Bank extends JavaPlugin {
             CommonVariables.logger.warning("Can not write prices.json file");
         }
 
-        for (Map.Entry <String, Inventory> inventory : CommonVariables.shopsInventories.entrySet()) {
-            for (int i = 0; i < CommonVariables.shops.size(); i++) {
-                if (inventory.getKey().equals(CommonVariables.shops.get(i).getName())) {
-                    Shop shop = CommonVariables.shops.get(i);
-                    ArrayList<ShopItem> shopItems = new ArrayList<>();
-                    for (ItemStack item : inventory.getValue()) {
-                        int price = -1;
-                        try {
-                            price = Integer.parseInt(item.getLore().get(item.getLore().size() - 1));
-                        } catch (Exception ignored) {}
-                        shopItems.add(new ShopItem(item, price));
-                        CommonVariables.shops.set(i, shop);
-                    }
-                    shop.setItems(shopItems);
-                    CommonVariables.shops.set(i, shop);
-                }
-            }
-        }
-
-        FileConfiguration config = new YamlConfiguration();
-        config.set("Shops", CommonVariables.shops);
+        FileConfiguration shopsConfig = new YamlConfiguration();
+        shopsConfig.set("Shops", CommonVariables.shops);
         try {
-            config.save(new File("plugins/Bank/shops.yml"));
+            shopsConfig.save(new File("plugins/Bank/shops.yml"));
         } catch (Exception e) {
             CommonVariables.logger.warning("Something went wrong while trying to write shops.yml file");
         }

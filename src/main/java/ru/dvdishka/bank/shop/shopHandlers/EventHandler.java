@@ -3,11 +3,13 @@ package ru.dvdishka.bank.shop.shopHandlers;
 import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import ru.dvdishka.bank.blancville.Classes.Card;
+import ru.dvdishka.bank.blancville.blancvilleHandlers.Commands;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
 import ru.dvdishka.bank.common.CommonVariables;
@@ -30,15 +32,65 @@ public class EventHandler implements Listener {
     public void onShopInventoryClick(InventoryClickEvent event) {
 
         for (Shop shop : CommonVariables.shops) {
-            if (!shop.getOwner().equals(event.getWhoClicked().getName()) &&
-                    event.getView().getTopInventory().equals(CommonVariables.shopsInventories.get(shop.getName()))) {
-                int i = 0;
-                for (ItemStack item : CommonVariables.shopsInventories.get(shop.getName())) {
-                    if (item == null) {
-                        CommonVariables.shopsInventories.get(shop.getName()).setItem(i, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, 1));
+            int page = 0;
+            for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName()))
+            {
+                if (!shop.getOwner().equals(event.getWhoClicked().getName()) &&
+                        event.getView().getTopInventory().equals(inventory)) {
+                    int i = 0;
+                    for (ItemStack item : inventory) {
+                        if (item == null) {
+                            CommonVariables.shopsInventories.get(shop.getName()).get(page)
+                                    .setItem(i, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                        }
+                        i++;
                     }
-                    i++;
                 }
+                page++;
+            }
+        }
+
+        for (Shop shop : CommonVariables.shops) {
+            int i = 0;
+            for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
+                if (inventory.equals(event.getClickedInventory())) {
+                    if (event.getCurrentItem() != null) {
+
+                        ItemStack prevPage = new ItemStack(Material.ARROW);
+                        ItemStack nextPage = new ItemStack(Material.ARROW);
+                        ItemMeta prevPageMeta = prevPage.getItemMeta();
+                        prevPageMeta.setDisplayName("<--");
+                        prevPage.setItemMeta(prevPageMeta);
+                        ItemMeta nextPageMeta = nextPage.getItemMeta();
+                        nextPageMeta.setDisplayName("-->");
+                        nextPage.setItemMeta(nextPageMeta);
+
+                        if (event.getCurrentItem().equals(prevPage)) {
+
+                            if (i > 0) {
+                                event.getWhoClicked().openInventory(CommonVariables.shopsInventories
+                                        .get(shop.getName()).get(i - 1));
+                                event.setCancelled(true);
+                                return;
+                            }
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if (event.getCurrentItem().equals(nextPage)) {
+
+                            if (i < CommonVariables.shopsInventories.get(shop.getName()).size() - 1) {
+                                event.getWhoClicked().openInventory(CommonVariables.shopsInventories
+                                        .get(shop.getName()).get(i + 1));
+                                event.setCancelled(true);
+                                return;
+                            }
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+                i++;
             }
         }
 
@@ -47,11 +99,13 @@ public class EventHandler implements Listener {
 
         for (Shop shop : CommonVariables.shops) {
             if (!event.getWhoClicked().getName().equals(shop.getOwner())) {
-                if (CommonVariables.shopsInventories.get(shop.getName()) == event.getClickedInventory()) {
-                    firstFlag = true;
-                }
-                if (event.getView().getTopInventory().equals(CommonVariables.shopsInventories.get(shop.getName()))) {
-                    secondFlag = true;
+                for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
+                    if (inventory == event.getClickedInventory()) {
+                        firstFlag = true;
+                    }
+                    if (event.getView().getTopInventory().equals(inventory)) {
+                        secondFlag = true;
+                    }
                 }
             }
         }
@@ -66,139 +120,144 @@ public class EventHandler implements Listener {
         }
 
         for (Shop shop : CommonVariables.shops) {
-            if (CommonVariables.shopsInventories.get(shop.getName()) == event.getClickedInventory()) {
 
-                if (event.getWhoClicked().getName().equals(shop.getOwner())) {
-                    if (event.getCurrentItem() != null) {
-                        List<String> list = event.getCurrentItem().getLore();
-                        if (list != null) {
-                            try {
-                                Integer.parseInt(list.get(list.size() - 1));
-                                list.remove(list.size() - 1);
-                                event.getCurrentItem().setLore(list);
-                                return;
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                }
+            for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
 
-                if (!event.getWhoClicked().getName().equals(shop.getOwner())) {
+                if (inventory == event.getClickedInventory()) {
 
-                    if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
-                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                        Sound.Source.BLOCK, 50, 1));
-                        event.setCancelled(true);
-                        return;
-                    }
-
-                    if (event.getCurrentItem() != null) {
-                        if (event.getCurrentItem().getType() != Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-                            if (event.getCurrentItem().getLore() != null && event.getCurrentItem().getLore().size() > 0) {
-
-                                int price = 0;
+                    if (event.getWhoClicked().getName().equals(shop.getOwner())) {
+                        if (event.getCurrentItem() != null) {
+                            List<String> list = event.getCurrentItem().getLore();
+                            if (list != null) {
                                 try {
-
-
-                                    price = Integer.parseInt(event.getCurrentItem().getLore().get(event.getCurrentItem().getLore().size() - 1));
-                                    Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
-
-
-                                    File file = new File("plugins/Bank/Cards/" + event.getWhoClicked().getName() + ".json");
-                                    if (!file.exists()) {
-                                        event.getWhoClicked().sendMessage(ChatColor.RED + "You have no bank card!");
-                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                        Sound.Source.BLOCK, 50, 1));
-                                        event.setCancelled(true);
-                                        return;
-                                    }
-                                    FileReader fileReader = new FileReader(file);
-                                    BufferedReader bufferedReader = new BufferedReader(fileReader);
-                                    String json = "";
-                                    String line;
-                                    while ((line = bufferedReader.readLine()) != null) {
-                                        json = json.concat(line);
-                                    }
-                                    bufferedReader.close();
-                                    fileReader.close();
-                                    PlayerCard playerCard = gson.fromJson(json, PlayerCard.class);
-
-
-                                    FileReader cardFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/" + playerCard.getNumber() + ".json");
-                                    BufferedReader cardBufferedReader = new BufferedReader(cardFileReader);
-                                    String cardJson = "";
-                                    String cardLine;
-                                    while ((cardLine = cardBufferedReader.readLine()) != null) {
-                                        cardJson = cardJson.concat(cardLine);
-                                    }
-                                    cardBufferedReader.close();
-                                    cardFileReader.close();
-                                    Card card = gson.fromJson(cardJson, Card.class);
-                                    double money = card.getMoney();
-                                    if (money >= price) {
-                                        money -= price;
-                                        card.setMoney(money);
-                                        FileWriter fileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/" + playerCard.getNumber() + ".json");
-                                        fileWriter.write(gson.toJson(card));
-                                        fileWriter.close();
-                                    } else {
-                                        event.getWhoClicked().sendMessage(ChatColor.RED + "You dont have " + price + " l`argent");
-                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                        Sound.Source.BLOCK, 50, 1));
-                                        event.setCancelled(true);
-                                        return;
-                                    }
-
-
-                                    FileReader ownerCardFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/" + shop.getCardNumber() + ".json");
-                                    BufferedReader ownerCardBufferedReader = new BufferedReader(ownerCardFileReader);
-                                    String ownerCardJson = "";
-                                    String ownerCardLine;
-                                    while ((ownerCardLine = ownerCardBufferedReader.readLine()) != null) {
-                                        ownerCardJson = ownerCardJson.concat(ownerCardLine);
-                                    }
-                                    ownerCardBufferedReader.close();
-                                    ownerCardFileReader.close();
-                                    Card ownerCard = gson.fromJson(ownerCardJson, Card.class);
-                                    double ownerMoney = ownerCard.getMoney();
-                                    ownerCard.setMoney(ownerMoney + price);
-                                    FileWriter ownerCardFileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/" + shop.getCardNumber() + ".json");
-                                    ownerCardFileWriter.write(gson.toJson(ownerCard));
-                                    ownerCardFileWriter.close();
-
-
-                                    List<String> list = event.getCurrentItem().getLore();
+                                    Integer.parseInt(list.get(list.size() - 1));
                                     list.remove(list.size() - 1);
                                     event.getCurrentItem().setLore(list);
-
-
-                                    event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                            (org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                                    Sound.Source.NEUTRAL, 50, 1));
-
-                                } catch (Exception e) {
-                                    event.getWhoClicked().sendMessage(ChatColor.RED + "Something went wrong!");
-                                    event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                            (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                            Sound.Source.BLOCK, 50, 1));
-                                    event.setCancelled(true);
                                     return;
+                                } catch (Exception ignored) {
                                 }
-                            } else {
-                                event.getWhoClicked().sendMessage(ChatColor.RED + "This item has no price!");
-                                event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                        (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                Sound.Source.BLOCK, 50, 1));
-                                event.setCancelled(true);
-                                return;
                             }
-                        } else {
+                        }
+                    }
+
+                    if (!event.getWhoClicked().getName().equals(shop.getOwner())) {
+
+                        if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
                             event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
                                     (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
                                             Sound.Source.BLOCK, 50, 1));
                             event.setCancelled(true);
+                            return;
+                        }
+
+                        if (event.getCurrentItem() != null) {
+                            if (event.getCurrentItem().getType() != Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
+                                if (event.getCurrentItem().getLore() != null && event.getCurrentItem().getLore().size() > 0) {
+
+                                    int price = 0;
+                                    try {
+
+
+                                        price = Integer.parseInt(event.getCurrentItem().getLore().get(event.getCurrentItem().getLore().size() - 1));
+                                        Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
+
+
+                                        File file = new File("plugins/Bank/Cards/" + event.getWhoClicked().getName() + ".json");
+                                        if (!file.exists()) {
+                                            event.getWhoClicked().sendMessage(ChatColor.RED + "You have no bank card!");
+                                            event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                                    (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                            Sound.Source.BLOCK, 50, 1));
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+                                        FileReader fileReader = new FileReader(file);
+                                        BufferedReader bufferedReader = new BufferedReader(fileReader);
+                                        String json = "";
+                                        String line;
+                                        while ((line = bufferedReader.readLine()) != null) {
+                                            json = json.concat(line);
+                                        }
+                                        bufferedReader.close();
+                                        fileReader.close();
+                                        PlayerCard playerCard = gson.fromJson(json, PlayerCard.class);
+
+
+                                        FileReader cardFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/" + playerCard.getNumber() + ".json");
+                                        BufferedReader cardBufferedReader = new BufferedReader(cardFileReader);
+                                        String cardJson = "";
+                                        String cardLine;
+                                        while ((cardLine = cardBufferedReader.readLine()) != null) {
+                                            cardJson = cardJson.concat(cardLine);
+                                        }
+                                        cardBufferedReader.close();
+                                        cardFileReader.close();
+                                        Card card = gson.fromJson(cardJson, Card.class);
+                                        double money = card.getMoney();
+                                        if (money >= price) {
+                                            money -= price;
+                                            card.setMoney(money);
+                                            FileWriter fileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/" + playerCard.getNumber() + ".json");
+                                            fileWriter.write(gson.toJson(card));
+                                            fileWriter.close();
+                                        } else {
+                                            event.getWhoClicked().sendMessage(ChatColor.RED + "You dont have " + price + " l`argent");
+                                            event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                                    (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                            Sound.Source.BLOCK, 50, 1));
+                                            event.setCancelled(true);
+                                            return;
+                                        }
+
+
+                                        FileReader ownerCardFileReader = new FileReader("/home/server/minecraft/Blancville_bank/users/" + shop.getCardNumber() + ".json");
+                                        BufferedReader ownerCardBufferedReader = new BufferedReader(ownerCardFileReader);
+                                        String ownerCardJson = "";
+                                        String ownerCardLine;
+                                        while ((ownerCardLine = ownerCardBufferedReader.readLine()) != null) {
+                                            ownerCardJson = ownerCardJson.concat(ownerCardLine);
+                                        }
+                                        ownerCardBufferedReader.close();
+                                        ownerCardFileReader.close();
+                                        Card ownerCard = gson.fromJson(ownerCardJson, Card.class);
+                                        double ownerMoney = ownerCard.getMoney();
+                                        ownerCard.setMoney(ownerMoney + price);
+                                        FileWriter ownerCardFileWriter = new FileWriter("/home/server/minecraft/Blancville_bank/users/" + shop.getCardNumber() + ".json");
+                                        ownerCardFileWriter.write(gson.toJson(ownerCard));
+                                        ownerCardFileWriter.close();
+
+
+                                        List<String> list = event.getCurrentItem().getLore();
+                                        list.remove(list.size() - 1);
+                                        event.getCurrentItem().setLore(list);
+
+
+                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                                (org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                                        Sound.Source.NEUTRAL, 50, 1));
+
+                                    } catch (Exception e) {
+                                        event.getWhoClicked().sendMessage(ChatColor.RED + "Something went wrong!");
+                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                                (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                        Sound.Source.BLOCK, 50, 1));
+                                        event.setCancelled(true);
+                                        return;
+                                    }
+                                } else {
+                                    event.getWhoClicked().sendMessage(ChatColor.RED + "This item has no price!");
+                                    event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                            (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    Sound.Source.BLOCK, 50, 1));
+                                    event.setCancelled(true);
+                                    return;
+                                }
+                            } else {
+                                event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
+                                        (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                Sound.Source.BLOCK, 50, 1));
+                                event.setCancelled(true);
+                            }
                         }
                     }
                 }
@@ -249,7 +308,7 @@ public class EventHandler implements Listener {
 
                     ItemMeta currentItemMeta = event.getCurrentItem().getItemMeta();
                     event.getWhoClicked().openInventory(CommonVariables.shopsInventories
-                            .get(currentItemMeta.getDisplayName()));
+                            .get(currentItemMeta.getDisplayName()).get(0));
                     event.setCancelled(true);
                     return;
                 }
@@ -308,12 +367,71 @@ public class EventHandler implements Listener {
                                 .title(ChatColor.DARK_GREEN + shop.getName())
                                 .subtitle(ChatColor.GOLD + "New icon has been set")
                                 .build());
+                        player.closeInventory();
                     }
                     event.setCancelled(true);
                     return;
                 }
             }
             i++;
+        }
+    }
+
+    @org.bukkit.event.EventHandler
+    public void onUpgradeMenuClick(InventoryClickEvent event) {
+
+        if (event.getClickedInventory().equals(CommonVariables.upgradeMenu)) {
+            if (event.getCurrentItem() != null) {
+                Shop shop = Shop.getShop(CommonVariables.playerShopUpgrade.get(event.getWhoClicked().getName()));
+                ItemStack newPage = new ItemStack(Material.PAPER);
+                ItemMeta newPageMeta = newPage.getItemMeta();
+                newPageMeta.setDisplayName("New page");
+                newPage.setItemMeta(newPageMeta);
+                if (event.getCurrentItem().equals(newPage)) {
+                    if (Commands.doHaveMoney(event.getWhoClicked().getName(), 10)) {
+                        if (Commands.takeMoney(event.getWhoClicked().getName(), 10)) {
+                            ItemStack prevPage = new ItemStack(Material.ARROW);
+                            ItemStack nextPage = new ItemStack(Material.ARROW);
+                            ItemMeta prevPageMeta = prevPage.getItemMeta();
+                            prevPageMeta.setDisplayName("<--");
+                            prevPage.setItemMeta(prevPageMeta);
+                            ItemMeta nextPageMeta = nextPage.getItemMeta();
+                            nextPageMeta.setDisplayName("-->");
+                            nextPage.setItemMeta(nextPageMeta);
+                            Inventory inventory = Bukkit.createInventory(null, 27,
+                                    ChatColor.GOLD + shop.getName() + " " +
+                                            (CommonVariables.shopsInventories.get(shop.getName()).size() + 1));
+                            inventory.setItem(18, prevPage);
+                            inventory.setItem(26, nextPage);
+                            CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
+                            event.setCancelled(true);
+                        } else {
+                            event.getWhoClicked().closeInventory();
+                            Player player = (Player) event.getWhoClicked();
+                            player.sendTitle(Title
+                                    .builder()
+                                    .title(ChatColor.DARK_GREEN + shop.getName())
+                                    .subtitle(ChatColor.RED + "Something went wrong")
+                                    .build());
+                            event.getWhoClicked().closeInventory();
+                            event.setCancelled(true);
+                            return;
+                        }
+                    } else {
+                        event.getWhoClicked().closeInventory();
+                        Player player = (Player) event.getWhoClicked();
+                        player.sendTitle(Title
+                                .builder()
+                                .title(ChatColor.DARK_GREEN + shop.getName())
+                                .subtitle(ChatColor.RED + "You do not have money for upgrade")
+                                .build());
+                        event.getWhoClicked().closeInventory();
+                        event.setCancelled(true);
+                        return;
+                    }
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 }

@@ -1,12 +1,15 @@
 package ru.dvdishka.bank.shop.Classes;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Item;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import ru.dvdishka.bank.common.CommonVariables;
 
@@ -19,11 +22,11 @@ public class Shop implements ConfigurationSerializable {
 
     private String name;
     private String owner;
-    private ArrayList<ShopItem> items = new ArrayList<>(27);
+    private ArrayList<Inventory> items = new ArrayList<>();
     private int cardNumber;
     private ItemStack icon;
 
-    public Shop(String name, String owner, ArrayList<ShopItem> items, int cardNumber, ItemStack icon) {
+    public Shop(String name, String owner, ArrayList<Inventory> items, int cardNumber, ItemStack icon) {
         this.name = name;
         this.owner = owner;
         this.items = items;
@@ -46,7 +49,7 @@ public class Shop implements ConfigurationSerializable {
         return this.owner;
     }
 
-    public ArrayList<ShopItem> getItems() {
+    public ArrayList<Inventory> getItems() {
         return this.items;
     }
 
@@ -66,12 +69,8 @@ public class Shop implements ConfigurationSerializable {
         this.owner = owner;
     }
 
-    public void setItems(ArrayList<ShopItem> items) {
+    public void setItems(ArrayList<Inventory> items) {
         this.items = items;
-    }
-
-    public void setItem(int index, ShopItem item) {
-        this.items.set(index, item);
     }
 
     public void setCardNumber(int cardNumber) {
@@ -96,7 +95,15 @@ public class Shop implements ConfigurationSerializable {
         HashMap<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("owner", owner);
-        map.put("items", items);
+        ArrayList<ArrayList<ItemStack>> contents = new ArrayList<>();
+        for (Inventory inventory : CommonVariables.shopsInventories.get(name)) {
+            ArrayList<ItemStack> itemStacks = new ArrayList<>();
+            for (int i = 0; i < inventory.getSize(); i++) {
+                itemStacks.add(inventory.getItem(i));
+            }
+            contents.add(itemStacks);
+        }
+        map.put("items", contents);
         map.put("cardNumber", cardNumber);
         map.put("icon", icon);
         return map;
@@ -105,7 +112,19 @@ public class Shop implements ConfigurationSerializable {
     public static Shop deserialize(Map<String, Object> map) {
         String name = (String) map.get("name");
         String owner = (String) map.get("owner");
-        ArrayList<ShopItem> items = (ArrayList<ShopItem>) map.get("items");
+        ArrayList<ArrayList<ItemStack>> contents = (ArrayList<ArrayList<ItemStack>>) map.get("items");
+        int i = 1;
+        ArrayList<Inventory> items = new ArrayList<>();
+        for (ArrayList<ItemStack> item : contents) {
+            Inventory inventory = Bukkit.createInventory(null, 27, ChatColor.GOLD + name + " " + i);
+            int index = 0;
+            for (ItemStack itemStack : item) {
+                inventory.setItem(index, itemStack);
+                index++;
+            }
+            items.add(inventory);
+            i++;
+        }
         int cardNumber = (int) map.get("cardNumber");
         ItemStack icon;
         if (map.get("icon") == null) {

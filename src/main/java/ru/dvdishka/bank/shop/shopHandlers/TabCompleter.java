@@ -24,7 +24,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 }
             }
             if (flag) {
-                return List.of("create", "edit", "open");
+                return List.of("create", "edit", "upgrade", "open");
             } else {
                 return List.of("create", "open");
             }
@@ -36,7 +36,7 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 return List.of("name");
             }
 
-            else if (args[0].equals("edit")) {
+            else if (args[0].equals("edit") || args[0].equals("upgrade")) {
                 ArrayList<String> list = new ArrayList<>();
                 for (Shop shop : CommonVariables.shops) {
                     if (shop.getOwner().equals(sender.getName())) {

@@ -1,11 +1,12 @@
 package ru.dvdishka.bank.shop.shopHandlers;
 
-import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import ru.dvdishka.bank.blancville.Classes.Card;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
@@ -53,14 +54,18 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             CommonVariables.playerShopCreating.put(player.getName(), shopName);
 
-            TextComponent text = Component
-                    .text("Creating a shop costs 10 l`argent\n")
-                    .append(Component.text(ChatColor.GREEN + "[CREATE]")
-                    .clickEvent(ClickEvent.runCommand("/shop creating " + shopName + " " + player.getName())))
-                    .append(Component.text("   "))
-                    .append(Component.text(ChatColor.RED + "[CANCEL]")
-                    .clickEvent(ClickEvent.runCommand("/shop creating cancel " + player.getName())));
-            sender.sendMessage(text);
+            BaseComponent[] text = new ComponentBuilder("Creating a shop costs 10 l`argent\n")
+                    .append("[CREATE]")
+                    .color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .event(new net.md_5.bungee.api.chat.ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND,
+                            "/shop creating "
+                                    + shopName + " " + player.getName()))
+                    .append("   ")
+                    .append("[CANCEL]")
+                    .color(net.md_5.bungee.api.ChatColor.RED)
+                    .event(new net.md_5.bungee.api.chat.ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating cancel " + player.getName()))
+                    .create();
+            sender.spigot().sendMessage(text);
             return true;
         }
 
@@ -161,11 +166,8 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             CommonVariables.shopsInventories.put(shop.getName(), pages);
             CommonVariables.playerShopCreating.remove(player.getName());
 
-            player.sendTitle(Title
-                    .builder()
-                    .title(ChatColor.DARK_GREEN + shop.getName())
-                    .subtitle(ChatColor.GOLD + "has been created")
-                    .build());
+            player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                    ChatColor.GOLD + "has been created");
             return true;
         }
 
@@ -294,8 +296,8 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 }
             }
             CommonVariables.shopsInventories.get(shop.getName()).get(page).getItem(index - 1).setItemMeta(meta);
-            player.sendTitle(Title.builder().title(ChatColor.DARK_GREEN + shop.getName()).subtitle(ChatColor.GOLD +
-                    "price has been set").build());
+            player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                    ChatColor.GOLD + "price has been set");
             return true;
         }
 
@@ -323,10 +325,8 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
             shop.setCardNumber(cardNumber);
-            player.sendTitle(Title.builder()
-                    .title(ChatColor.DARK_GREEN + shop.getName())
-                            .subtitle(ChatColor.GOLD + "card number has been set")
-                    .build());
+            player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                            ChatColor.GOLD + "card number has been set");
             return true;
         }
 
@@ -369,10 +369,8 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                     checkShop.setIcon(icon);
                 }
             }
-            player.sendTitle(Title.builder()
-                    .title(ChatColor.DARK_GREEN + name)
-                    .subtitle(ChatColor.GOLD + "Shop name has been set")
-                    .build());
+            player.sendTitle(ChatColor.DARK_GREEN + name,
+                    ChatColor.GOLD + "Shop name has been set");
             return true;
         }
 

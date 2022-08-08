@@ -1,9 +1,9 @@
 package ru.dvdishka.bank.shop.shopHandlers;
 
-import com.destroystokyo.paper.Title;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -12,7 +12,8 @@ import ru.dvdishka.bank.blancville.blancvilleHandlers.Commands;
 import ru.dvdishka.bank.shop.Classes.PlayerCard;
 import ru.dvdishka.bank.shop.Classes.Shop;
 import ru.dvdishka.bank.common.CommonVariables;
-import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.audience.Audience;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
@@ -55,6 +56,7 @@ public class EventHandler implements Listener {
                 if (inventory.equals(event.getClickedInventory())) {
                     if (event.getCurrentItem() != null) {
 
+                        Player player = (Player) event.getWhoClicked();
                         ItemStack prevPage = new ItemStack(Material.ARROW);
                         ItemStack nextPage = new ItemStack(Material.ARROW);
                         ItemMeta prevPageMeta = prevPage.getItemMeta();
@@ -67,23 +69,21 @@ public class EventHandler implements Listener {
                         if (event.getCurrentItem().equals(prevPage)) {
 
                             if (i > 0) {
-                                event.getWhoClicked()
-                                        .playSound(Sound
-                                        .sound(
+                                player.playSound(
+                                        player.getLocation(),
                                         org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                        Sound.Source.NEUTRAL,
-                                        50, 1));
+                                        50,
+                                        1);
                                 event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                                         .get(shop.getName()).get(i - 1));
                                 event.setCancelled(true);
                                 return;
                             } else {
-                                event.getWhoClicked()
-                                        .playSound(Sound
-                                                .sound(
-                                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                        Sound.Source.BLOCK,
-                                                        50, 1));
+                                player.playSound(
+                                        player.getLocation(),
+                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                        50,
+                                        1);
                             }
                             event.setCancelled(true);
                             return;
@@ -92,23 +92,20 @@ public class EventHandler implements Listener {
                         if (event.getCurrentItem().equals(nextPage)) {
 
                             if (i < CommonVariables.shopsInventories.get(shop.getName()).size() - 1) {
-                                event.getWhoClicked()
-                                        .playSound(Sound
-                                        .sound(
-                                                org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                                Sound.Source.NEUTRAL,
-                                                50, 1));
+                                player.playSound(
+                                        player.getLocation(),
+                                        org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                        50, 1);
                                 event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                                         .get(shop.getName()).get(i + 1));
                                 event.setCancelled(true);
                                 return;
                             } else {
-                                event.getWhoClicked()
-                                        .playSound(Sound
-                                                .sound(
-                                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                        Sound.Source.BLOCK,
-                                                        50, 1));
+                                player.playSound(
+                                        player.getLocation(),
+                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                        50,
+                                        1);
                             }
                             event.setCancelled(true);
                             return;
@@ -136,9 +133,12 @@ public class EventHandler implements Listener {
         }
         if (!firstFlag && secondFlag) {
             if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-                event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                        (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                Sound.Source.BLOCK, 50, 1));
+                Player player = (Player) event.getWhoClicked();
+                player.playSound(
+                        player.getLocation(),
+                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                        50,
+                        1);
                 event.setCancelled(true);
                 return;
             }
@@ -152,12 +152,14 @@ public class EventHandler implements Listener {
 
                     if (event.getWhoClicked().getName().equals(shop.getOwner())) {
                         if (event.getCurrentItem() != null) {
-                            List<String> list = event.getCurrentItem().getLore();
+                            List<String> list = event.getCurrentItem().getItemMeta().getLore();
                             if (list != null) {
                                 try {
                                     Integer.parseInt(list.get(list.size() - 1));
                                     list.remove(list.size() - 1);
-                                    event.getCurrentItem().setLore(list);
+                                    ItemMeta itemMeta  = event.getCurrentItem().getItemMeta();
+                                    itemMeta.setLore(list);
+                                    event.getCurrentItem().setItemMeta(itemMeta);
                                     return;
                                 } catch (Exception ignored) {
                                 }
@@ -167,32 +169,38 @@ public class EventHandler implements Listener {
 
                     if (!event.getWhoClicked().getName().equals(shop.getOwner())) {
 
+                        Player player = (Player) event.getWhoClicked();
+
                         if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
-                            event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                    (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                            Sound.Source.BLOCK, 50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50,
+                                    1);
                             event.setCancelled(true);
                             return;
                         }
 
                         if (event.getCurrentItem() != null) {
                             if (event.getCurrentItem().getType() != Material.LIGHT_GRAY_STAINED_GLASS_PANE) {
-                                if (event.getCurrentItem().getLore() != null && event.getCurrentItem().getLore().size() > 0) {
+                                ItemMeta itemMeta = event.getCurrentItem().getItemMeta();
+                                if (itemMeta.getLore() != null && itemMeta.getLore().size() > 0) {
 
                                     int price = 0;
                                     try {
 
 
-                                        price = Integer.parseInt(event.getCurrentItem().getLore().get(event.getCurrentItem().getLore().size() - 1));
+                                        price = Integer.parseInt(itemMeta.getLore().get(itemMeta.getLore().size() - 1));
                                         Gson gson = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
 
 
                                         File file = new File("plugins/Bank/Cards/" + event.getWhoClicked().getName() + ".json");
                                         if (!file.exists()) {
                                             event.getWhoClicked().sendMessage(ChatColor.RED + "You have no bank card!");
-                                            event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                    (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                            Sound.Source.BLOCK, 50, 1));
+                                            player.playSound(
+                                                    player.getLocation(),
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    50, 1);
                                             event.setCancelled(true);
                                             return;
                                         }
@@ -227,9 +235,11 @@ public class EventHandler implements Listener {
                                             fileWriter.close();
                                         } else {
                                             event.getWhoClicked().sendMessage(ChatColor.RED + "You dont have " + price + " l`argent");
-                                            event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                    (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                            Sound.Source.BLOCK, 50, 1));
+                                            player.playSound(
+                                                    player.getLocation(),
+                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                    50,
+                                                    1);
                                             event.setCancelled(true);
                                             return;
                                         }
@@ -252,35 +262,44 @@ public class EventHandler implements Listener {
                                         ownerCardFileWriter.close();
 
 
-                                        List<String> list = event.getCurrentItem().getLore();
+                                        List<String> list = itemMeta.getLore();
                                         list.remove(list.size() - 1);
-                                        event.getCurrentItem().setLore(list);
+                                        itemMeta.setLore(list);
+                                        event.getCurrentItem().setItemMeta(itemMeta);
 
 
-                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                (org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                                        Sound.Source.NEUTRAL, 50, 1));
+                                        player.playSound(
+                                                player.getLocation(),
+                                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                                50,
+                                                1);
 
                                     } catch (Exception e) {
                                         event.getWhoClicked().sendMessage(ChatColor.RED + "Something went wrong!");
-                                        event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                                (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                        Sound.Source.BLOCK, 50, 1));
+                                        player.playSound(
+                                                player.getLocation(),
+                                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                                50,
+                                                1);
                                         event.setCancelled(true);
                                         return;
                                     }
                                 } else {
                                     event.getWhoClicked().sendMessage(ChatColor.RED + "This item has no price!");
-                                    event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                            (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                    Sound.Source.BLOCK, 50, 1));
+                                    player.playSound(
+                                            player.getLocation(),
+                                            org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                            50,
+                                            1);
                                     event.setCancelled(true);
                                     return;
                                 }
                             } else {
-                                event.getWhoClicked().playSound(net.kyori.adventure.sound.Sound.sound
-                                        (org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                Sound.Source.BLOCK, 50, 1));
+                                player.playSound(
+                                        player.getLocation(),
+                                        org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                        50,
+                                        1);
                                 event.setCancelled(true);
                             }
                         }
@@ -308,24 +327,24 @@ public class EventHandler implements Listener {
                 prevPage.setItemMeta(prevPageMeta);
                 nextPage.setItemMeta(nextPageMeta);
 
+                Player player = (Player) event.getWhoClicked();
+
                 if (event.getCurrentItem() != null) {
 
                     if (event.getCurrentItem().equals(prevPage)) {
                         if (i > 0) {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                    .sound(
-                                            org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                            Sound.Source.NEUTRAL,
-                                            50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                    50,
+                                    1);
                             event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i - 1));
                         } else {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                    Sound.Source.BLOCK,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50,
+                                    1);
                         }
                         event.setCancelled(true);
                         return;
@@ -333,43 +352,39 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(nextPage)) {
                         if (i < CommonVariables.shopMenu.size() - 1) {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                                    Sound.Source.NEUTRAL,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                    50,
+                                    1);
                             event.getWhoClicked().openInventory(CommonVariables.shopMenu.get(i + 1));
                         } else {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                    Sound.Source.BLOCK,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50,
+                                    1);
                         }
                         event.setCancelled(true);
                         return;
                     }
 
                     if (event.getCurrentItem().equals(new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE))) {
-                        event.getWhoClicked()
-                                .playSound(Sound
-                                        .sound(
-                                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                Sound.Source.BLOCK,
-                                                50, 1));
+                        player.playSound(
+                                player.getLocation(),
+                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                50,
+                                1);
                         event.setCancelled(true);
                         return;
                     }
 
                     ItemMeta currentItemMeta = event.getCurrentItem().getItemMeta();
-                    event.getWhoClicked()
-                            .playSound(Sound
-                                    .sound(
-                                            org.bukkit.Sound.UI_BUTTON_CLICK,
-                                            Sound.Source.NEUTRAL,
-                                            50, 1));
+                    player.playSound(
+                            player.getLocation(),
+                            org.bukkit.Sound.UI_BUTTON_CLICK,
+                            50,
+                            1);
                     event.getWhoClicked().openInventory(CommonVariables.shopsInventories
                             .get(currentItemMeta.getDisplayName()).get(0));
                     event.setCancelled(true);
@@ -399,24 +414,24 @@ public class EventHandler implements Listener {
                 prevPage.setItemMeta(prevPageMeta);
                 nextPage.setItemMeta(nextPageMeta);
 
+                Player player = (Player) event.getWhoClicked();
+
                 if (event.getCurrentItem() != null) {
 
                     if (event.getCurrentItem().equals(prevPage)) {
                         if (i > 0) {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                                    Sound.Source.NEUTRAL,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                    50,
+                                    1);
                             event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i - 1));
                         } else {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                    Sound.Source.BLOCK,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50,
+                                    1);
                         }
                         event.setCancelled(true);
                         return;
@@ -424,20 +439,18 @@ public class EventHandler implements Listener {
 
                     if (event.getCurrentItem().equals(nextPage)) {
                         if (i < CommonVariables.iconMenu.size() - 1) {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
-                                                    Sound.Source.NEUTRAL,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.ITEM_BOOK_PAGE_TURN,
+                                    50,
+                                    1);
                             event.getWhoClicked().openInventory(CommonVariables.iconMenu.get(i + 1));
                         } else {
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                    Sound.Source.BLOCK,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50,
+                                    1);
                         }
                         event.setCancelled(true);
                         return;
@@ -445,31 +458,25 @@ public class EventHandler implements Listener {
 
                     ItemStack icon = new ItemStack(event.getCurrentItem().getType());
                     if (!icon.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
-                        event.getWhoClicked()
-                                .playSound(Sound
-                                        .sound(
-                                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                                Sound.Source.NEUTRAL,
-                                                50, 1));
+                        player.playSound(
+                                player.getLocation(),
+                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                50,
+                                1);
                         ItemMeta iconMeta = icon.getItemMeta();
                         iconMeta.setDisplayName(CommonVariables.playerShopIconChoose.get(event.getWhoClicked().getName()));
                         icon.setItemMeta(iconMeta);
                         Shop shop = Shop.getShop(CommonVariables.playerShopIconChoose.get(event.getWhoClicked().getName()));
                         shop.setIcon(icon);
-                        Player player = (Player) event.getWhoClicked();
-                        player.sendTitle(Title
-                                .builder()
-                                .title(ChatColor.DARK_GREEN + shop.getName())
-                                .subtitle(ChatColor.GOLD + "New icon has been set")
-                                .build());
+                        player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                                ChatColor.GOLD + "New icon has been set");
                         player.closeInventory();
                     } else {
-                        event.getWhoClicked()
-                                .playSound(Sound
-                                        .sound(
-                                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                                Sound.Source.BLOCK,
-                                                50, 1));
+                        player.playSound(
+                                player.getLocation(),
+                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                50,
+                                1);
                     }
                     event.setCancelled(true);
                     return;
@@ -500,27 +507,26 @@ public class EventHandler implements Listener {
                             ItemMeta nextPageMeta = nextPage.getItemMeta();
                             nextPageMeta.setDisplayName("-->");
                             nextPage.setItemMeta(nextPageMeta);
+
+                            Player player = (Player) event.getWhoClicked();
+
                             Inventory inventory = Bukkit.createInventory(null, 27,
                                     ChatColor.GOLD + shop.getName() + " " +
                                             (CommonVariables.shopsInventories.get(shop.getName()).size() + 1));
                             inventory.setItem(18, prevPage);
                             inventory.setItem(26, nextPage);
                             CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
-                            event.getWhoClicked()
-                                    .playSound(Sound
-                                            .sound(
-                                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                                    Sound.Source.NEUTRAL,
-                                                    50, 1));
+                            player.playSound(
+                                    player.getLocation(),
+                                    Sound.ENTITY_PLAYER_LEVELUP,
+                                    50,
+                                    1);
                             event.setCancelled(true);
                         } else {
                             event.getWhoClicked().closeInventory();
                             Player player = (Player) event.getWhoClicked();
-                            player.sendTitle(Title
-                                    .builder()
-                                    .title(ChatColor.DARK_GREEN + shop.getName())
-                                    .subtitle(ChatColor.RED + "Something went wrong")
-                                    .build());
+                            player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                                    ChatColor.RED + "Something went wrong");
                             event.getWhoClicked().closeInventory();
                             event.setCancelled(true);
                             return;
@@ -528,11 +534,8 @@ public class EventHandler implements Listener {
                     } else {
                         event.getWhoClicked().closeInventory();
                         Player player = (Player) event.getWhoClicked();
-                        player.sendTitle(Title
-                                .builder()
-                                .title(ChatColor.DARK_GREEN + shop.getName())
-                                .subtitle(ChatColor.RED + "You do not have money for upgrade")
-                                .build());
+                        player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
+                                ChatColor.RED + "You do not have money for upgrade");
                         event.getWhoClicked().closeInventory();
                         event.setCancelled(true);
                         return;

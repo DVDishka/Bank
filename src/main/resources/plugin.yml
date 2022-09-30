@@ -1,13 +1,11 @@
 name: Bank
 version: '${project.version}'
 main: ru.dvdishka.bank.Bank
-api-version: 1.19
+api-version: 1.16
 prefix: Bank
 authors: [ dvdishka ]
-description: Bank plugin for DVDcraft
+description: Bank plugin for mc.dvdcraft.ru
 website: dvdcraft.ru
 commands:
-  bank:
-    description: Bank
   shop:
     description: Shop

@@ -1,4 +1,4 @@
-package ru.dvdishka.bank.backwardsCompatibility;
+package ru.dvdishka.bank.shops.backwardsCompatibility;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;

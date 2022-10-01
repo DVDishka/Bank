@@ -36,7 +36,7 @@ public class Card {
 
     public static Card getCard(String playerName) {
 
-        File file = new File("plugins/Bank/Card/" + playerName + ".json");
+        File file = new File("plugins/Bank/Cards/" + playerName + ".json");
 
         if (!file.exists()) {
 

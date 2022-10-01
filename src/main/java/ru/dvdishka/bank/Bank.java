@@ -34,7 +34,7 @@ public final class Bank extends JavaPlugin {
         File shopsFile = new File("plugins/Bank/shops.yml");
         File configFile = new File("plugins/Bank/config.yml");
         File infiniteShopsFile = new File("plugins/Bank/infiniteShops.yml");
-        File cardDir = new File("plugins/Bank/Card");
+        File cardDir = new File("plugins/Bank/Cards");
 
         ItemStack prevPage = new ItemStack(Material.ARROW);
         ItemStack nextPage = new ItemStack(Material.ARROW);
@@ -211,11 +211,11 @@ public final class Bank extends JavaPlugin {
 
             try {
 
-                cardDir.createNewFile();
+                cardDir.mkdir();
 
             } catch (Exception e) {
 
-                CommonVariables.logger.warning("Card directory can not be created!");
+                CommonVariables.logger.warning("Cards directory can not be created!");
                 CommonVariables.logger.warning(e.getMessage());
             }
         }

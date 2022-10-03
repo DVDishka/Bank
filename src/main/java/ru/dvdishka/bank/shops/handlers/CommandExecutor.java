@@ -264,7 +264,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             } else {
 
-                File cardFile = new File("plugins/Bank/Card/" + senderPlayer.getName() + ".json");
+                File cardFile = new File("plugins/Bank/Cards/" + senderPlayer.getName() + ".json");
 
                 if (!cardFile.exists()) {
 

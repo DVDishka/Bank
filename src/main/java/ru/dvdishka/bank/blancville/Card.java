@@ -60,7 +60,9 @@ public class Card {
             bufferedReader.close();
             fileReader.close();
 
-            file = new File(ConfigVariables.blancvillePath + "users/" + cardNumber + ".json");
+            ServerCardJson cardJson = gson.fromJson(cardNumber, ServerCardJson.class);
+
+            file = new File(ConfigVariables.blancvillePath + "users/" + cardJson.getNumber() + ".json");
             fileReader = new FileReader(file);
             bufferedReader = new BufferedReader(fileReader);
 

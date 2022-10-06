@@ -108,37 +108,75 @@ public final class Bank extends JavaPlugin {
 
                 } else {
 
-                    Material shopCostMaterial = Material.valueOf(config.getString("shopCost.material").toUpperCase());
+                    if (!config.getString("shopCost.material").equalsIgnoreCase("bank")) {
 
-                    ConfigVariables.shopCost = new ItemStack(shopCostMaterial, shopCostAmount);
+                        Material shopCostMaterial = Material.valueOf(config.getString("shopCost.material").toUpperCase());
+                        ConfigVariables.shopCost = new ItemStack(shopCostMaterial, shopCostAmount);
+
+                    } else {
+
+                        ConfigVariables.isShopCostBank = true;
+                        ConfigVariables.shopCostBank = shopCostAmount;
+                    }
                 }
             } catch (Exception e) {
+
                 CommonVariables.logger.warning("Wrong material in shopCost.material (config.yml)");
                 CommonVariables.logger.warning(e.getMessage());
             }
 
             try {
+
                 int newPageCostAmount = config.getInt("newPageCost.amount");
+
                 if (newPageCostAmount < 0) {
+
                     CommonVariables.logger.warning("newPageCost.amount must be >= 0");
+
                 } else {
-                    Material newPageCostMaterial = Material.valueOf(config.getString("newPageCost.material").toUpperCase());
-                    ConfigVariables.newPageCost = new ItemStack(newPageCostMaterial, newPageCostAmount);
+
+                    if (!config.getString("newPageCost.material").equalsIgnoreCase("bank")) {
+
+                        Material newPageCostMaterial = Material.valueOf(config.getString("newPageCost.material").toUpperCase());
+                        ConfigVariables.newPageCost = new ItemStack(newPageCostMaterial, newPageCostAmount);
+
+                    } else {
+
+                        ConfigVariables.isNewPageCostBank = true;
+                        ConfigVariables.newPageCostBank = newPageCostAmount;
+                    }
                 }
+
             } catch (Exception e) {
+
                 CommonVariables.logger.warning("Wrong material in newPageCost.material (config.yml)");
                 CommonVariables.logger.warning(e.getMessage());
             }
 
             try {
+
                 int newLineCostAmount = config.getInt("newLineCost.amount");
+
                 if (newLineCostAmount < 0) {
+
                     CommonVariables.logger.warning("newLineCost.amount must be >= 0");
+
                 } else {
-                    Material newLineCostMaterial = Material.valueOf(config.getString("newLineCost.material").toUpperCase());
-                    ConfigVariables.newLineCost = new ItemStack(newLineCostMaterial, newLineCostAmount);
+
+                    if (!config.getString("newLineCost.material").equalsIgnoreCase("bank")) {
+
+                        Material newLineCostMaterial = Material.valueOf(config.getString("newLineCost.material").toUpperCase());
+                        ConfigVariables.newLineCost = new ItemStack(newLineCostMaterial, newLineCostAmount);
+
+                    } else {
+
+                        ConfigVariables.isNewLineCostBank = true;
+                        ConfigVariables.newLineCostBank = newLineCostAmount;
+                    }
                 }
+
             } catch (Exception e) {
+
                 CommonVariables.logger.warning("Wrong material in newLineCost.material (config.yml)");
                 CommonVariables.logger.warning(e.getMessage());
             }

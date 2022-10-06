@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import ru.dvdishka.bank.blancville.Card;
 import ru.dvdishka.bank.shops.common.CommonVariables;
 import ru.dvdishka.bank.shops.common.ConfigVariables;
 import ru.dvdishka.bank.shops.common.Functions;
@@ -43,8 +44,17 @@ public class UpgradeMenuClick implements Listener {
 
                 List<String> lore = new ArrayList<>();
 
-                lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
-                        ConfigVariables.newPageCost.getType().name());
+                if (!ConfigVariables.isNewPageCostBank) {
+
+                    lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
+                            ConfigVariables.newPageCost.getType().name());
+
+                } else {
+
+                    lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCostBank + " " +
+                            "l`argent");
+                }
+
                 lore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getPageProgress());
 
                 newPageMeta.setLore(lore);
@@ -57,8 +67,17 @@ public class UpgradeMenuClick implements Listener {
 
                 List<String> newLineLore = new ArrayList<>();
 
-                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
-                        ConfigVariables.newLineCost.getType().name());
+                if (!ConfigVariables.isNewLineCostBank) {
+
+                    newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
+                            ConfigVariables.newLineCost.getType().name());
+
+                } else {
+
+                    newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCostBank + " " +
+                            "l`argent");
+                }
+
                 newLineLore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getLineProgress() + "/6");
 
                 newLineMeta.setLore(newLineLore);
@@ -66,72 +85,168 @@ public class UpgradeMenuClick implements Listener {
 
                 if (event.getCurrentItem().equals(newPage)) {
 
-                    if (Functions.removeItem((Player) event.getWhoClicked(), ConfigVariables.newPageCost)) {
+                    if (!ConfigVariables.isNewPageCostBank) {
 
-                        shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress() + 1,
-                                shop.getUpgrade().getLineProgress()));
+                        if (Functions.removeItem((Player) event.getWhoClicked(), ConfigVariables.newPageCost)) {
 
-                        lore.clear();
-                        newPageMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "New Page");
-                        lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
-                                ConfigVariables.newPageCost.getType().name());
-                        lore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getPageProgress());
-                        newPageMeta.setLore(lore);
-                        newPage.setItemMeta(newPageMeta);
+                            shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress() + 1,
+                                    shop.getUpgrade().getLineProgress()));
 
-                        event.getCurrentItem().setItemMeta(newPageMeta);
+                            lore.clear();
 
-                        Inventory inventory;
+                            newPageMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "New Page");
 
-                        if (!isInfinite) {
+                            lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
+                                    ConfigVariables.newPageCost.getType().name());
 
-                            inventory = Bukkit.createInventory(null, CommonVariables.shopsInventories.get(shop.getName()).get(0).getSize(),
-                                    ChatColor.GOLD + shop.getName() + " " +
-                                            (CommonVariables.shopsInventories.get(shop.getName()).size() + 1));
-                        } else {
+                            lore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getPageProgress());
 
-                            if (shop.isSell()) {
+                            newPageMeta.setLore(lore);
+                            newPage.setItemMeta(newPageMeta);
 
-                                inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
-                                        ChatColor.GREEN + shop.getName() + " " +
-                                                (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+                            event.getCurrentItem().setItemMeta(newPageMeta);
 
+                            Inventory inventory;
+
+                            if (!isInfinite) {
+
+                                inventory = Bukkit.createInventory(null, CommonVariables.shopsInventories.get(shop.getName()).get(0).getSize(),
+                                        ChatColor.GOLD + shop.getName() + " " +
+                                                (CommonVariables.shopsInventories.get(shop.getName()).size() + 1));
                             } else {
 
-                                inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
-                                        ChatColor.GREEN + shop.getName() + " " +
-                                                (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+                                if (shop.isSell()) {
+
+                                    inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
+                                            ChatColor.GREEN + shop.getName() + " " +
+                                                    (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+
+                                } else {
+
+                                    inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
+                                            ChatColor.GREEN + shop.getName() + " " +
+                                                    (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+                                }
                             }
-                        }
 
-                        int nextPageIndex = inventory.getSize() - 1;
-                        int prevPageIndex = 0;
-                        if (inventory.getSize() % 9 == 0) {
-                            prevPageIndex = nextPageIndex - 8;
+                            int nextPageIndex = inventory.getSize() - 1;
+                            int prevPageIndex = 0;
+                            if (inventory.getSize() % 9 == 0) {
+                                prevPageIndex = nextPageIndex - 8;
+                            } else {
+                                prevPageIndex = (inventory.getSize() / 9) * 9;
+                            }
+
+                            inventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                            inventory.setItem(nextPageIndex, CommonVariables.nextPage);
+
+                            if (!isInfinite) {
+
+                                CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
+                            } else {
+
+                                CommonVariables.infiniteShopsInventories.get(shop.getName()).add(inventory);
+                            }
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                    50, 1);
                         } else {
-                            prevPageIndex = (inventory.getSize()/ 9) * 9;
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
                         }
 
-                        inventory.setItem(prevPageIndex, CommonVariables.prevPage);
-                        inventory.setItem(nextPageIndex, CommonVariables.nextPage);
-
-                        if (!isInfinite) {
-
-                            CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
-                        } else {
-
-                            CommonVariables.infiniteShopsInventories.get(shop.getName()).add(inventory);
-                        }
-
-                        player.playSound(player.getLocation(),
-                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                50, 1);
                     } else {
 
-                        player.playSound(player.getLocation(),
-                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                50, 1);
+                        Card card = Card.getCard(event.getWhoClicked().getName());
+
+                        if (card == null) {
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
+
+                            event.getWhoClicked().sendMessage(ChatColor.RED + "You do not have a bank card!");
+
+                            event.setCancelled(true);
+
+                            return;
+                        }
+
+                        if (card.hasMoney(ConfigVariables.newPageCostBank) && card.removeMoney(ConfigVariables.newPageCostBank)) {
+
+                            shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress() + 1,
+                                    shop.getUpgrade().getLineProgress()));
+
+                            lore.clear();
+
+                            newPageMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "New Page");
+
+                            lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCostBank + " " +
+                                    "l`argent");
+
+                            lore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getPageProgress());
+
+                            newPageMeta.setLore(lore);
+                            newPage.setItemMeta(newPageMeta);
+
+                            event.getCurrentItem().setItemMeta(newPageMeta);
+
+                            Inventory inventory;
+
+                            if (!isInfinite) {
+
+                                inventory = Bukkit.createInventory(null, CommonVariables.shopsInventories.get(shop.getName()).get(0).getSize(),
+                                        ChatColor.GOLD + shop.getName() + " " +
+                                                (CommonVariables.shopsInventories.get(shop.getName()).size() + 1));
+                            } else {
+
+                                if (shop.isSell()) {
+
+                                    inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
+                                            ChatColor.GREEN + shop.getName() + " " +
+                                                    (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+
+                                } else {
+
+                                    inventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories.get(shop.getName()).get(0).getSize(),
+                                            ChatColor.GREEN + shop.getName() + " " +
+                                                    (CommonVariables.infiniteShopsInventories.get(shop.getName()).size() + 1));
+                                }
+                            }
+
+                            int nextPageIndex = inventory.getSize() - 1;
+                            int prevPageIndex = 0;
+                            if (inventory.getSize() % 9 == 0) {
+                                prevPageIndex = nextPageIndex - 8;
+                            } else {
+                                prevPageIndex = (inventory.getSize() / 9) * 9;
+                            }
+
+                            inventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                            inventory.setItem(nextPageIndex, CommonVariables.nextPage);
+
+                            if (!isInfinite) {
+
+                                CommonVariables.shopsInventories.get(shop.getName()).add(inventory);
+                            } else {
+
+                                CommonVariables.infiniteShopsInventories.get(shop.getName()).add(inventory);
+                            }
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                    50, 1);
+                        } else {
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
+                        }
                     }
+
                     event.setCancelled(true);
                 }
 
@@ -146,134 +261,307 @@ public class UpgradeMenuClick implements Listener {
                         return;
                     }
 
-                    if (Functions.removeItem((Player) event.getWhoClicked(), ConfigVariables.newLineCost)) {
+                    if (!ConfigVariables.isNewLineCostBank) {
 
-                        shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress(),
-                                shop.getUpgrade().getLineProgress() + 1));
+                        if (Functions.removeItem((Player) event.getWhoClicked(), ConfigVariables.newLineCost)) {
 
-                        newLineLore.clear();
+                            shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress(),
+                                    shop.getUpgrade().getLineProgress() + 1));
 
-                        newLineMeta.setDisplayName(ChatColor.GREEN + "New Line");
-                        newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
-                                ConfigVariables.newLineCost.getType().name());
-                        newLineLore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getLineProgress() + "/6");
-                        newLineMeta.setLore(newLineLore);
-                        newLine.setItemMeta(newLineMeta);
+                            newLineLore.clear();
 
-                        event.getCurrentItem().setItemMeta(newLineMeta);
+                            newLineMeta.setDisplayName(ChatColor.GREEN + "New Line");
 
-                        ArrayList<Inventory> inventories = new ArrayList<>();
+                            if (!ConfigVariables.isNewLineCostBank) {
 
-                        int newInventorySize;
+                                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
+                                        ConfigVariables.newLineCost.getType().name());
 
-                        if (!isInfinite) {
+                            } else {
 
-                            newInventorySize = CommonVariables.shopsInventories
-                                    .get(shop.getName()).get(0).getSize() + 9;
-                        } else {
-
-                            newInventorySize = CommonVariables.infiniteShopsInventories
-                                    .get(shop.getName()).get(0).getSize() + 9;
-                        }
-
-                        int i = 0;
-
-                        if (!isInfinite) {
-
-                            for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
-
-                                int j = 0;
-
-                                Inventory newInventory = Bukkit.createInventory(null, CommonVariables.shopsInventories
-                                                .get(shop.getName()).get(0).getSize() + 9,
-                                        ChatColor.GOLD + shop.getName() + " " + (i + 1));
-                                for (ItemStack itemStack : inventory) {
-                                    if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
-                                        newInventory.setItem(j, itemStack);
-                                    }
-                                    j++;
-
-                                }
-                                int nextPageIndex = newInventorySize - 1;
-                                int prevPageIndex = 0;
-                                if (newInventorySize % 9 == 0) {
-                                    prevPageIndex = nextPageIndex - 8;
-                                } else {
-                                    prevPageIndex = (newInventorySize / 9) * 9;
-                                }
-                                newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
-                                newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
-                                inventories.add(newInventory);
-                                CommonVariables.shopsInventories.get(shop.getName()).set(i, inventory);
-                                i++;
+                                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCostBank + " " +
+                                        "l`argent");
                             }
 
-                        } else {
+                            newLineLore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getLineProgress() + "/6");
 
-                            for (Inventory inventory : CommonVariables.infiniteShopsInventories.get(shop.getName())) {
+                            newLineMeta.setLore(newLineLore);
+                            newLine.setItemMeta(newLineMeta);
 
-                                int j = 0;
+                            event.getCurrentItem().setItemMeta(newLineMeta);
 
-                                Inventory newInventory;
+                            ArrayList<Inventory> inventories = new ArrayList<>();
 
-                                if (!shop.isSell()) {
+                            int newInventorySize;
 
-                                    newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
-                                                    .get(shop.getName()).get(0).getSize() + 9,
-                                            ChatColor.GREEN + shop.getName() + " " + (i + 1));
+                            if (!isInfinite) {
 
-                                } else {
+                                newInventorySize = CommonVariables.shopsInventories
+                                        .get(shop.getName()).get(0).getSize() + 9;
+                            } else {
 
-                                    newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
-                                                    .get(shop.getName()).get(0).getSize() + 9,
-                                            ChatColor.RED + shop.getName() + " " + (i + 1));
-                                }
-                                for (ItemStack itemStack : inventory) {
-                                    if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
-                                        newInventory.setItem(j, itemStack);
-                                    }
-                                    j++;
-
-                                }
-                                int nextPageIndex = newInventorySize - 1;
-                                int prevPageIndex = 0;
-                                if (newInventorySize % 9 == 0) {
-                                    prevPageIndex = nextPageIndex - 8;
-                                } else {
-                                    prevPageIndex = (newInventorySize / 9) * 9;
-                                }
-                                newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
-                                newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
-                                inventories.add(newInventory);
-                                CommonVariables.infiniteShopsInventories.get(shop.getName()).set(i, inventory);
-                                i++;
+                                newInventorySize = CommonVariables.infiniteShopsInventories
+                                        .get(shop.getName()).get(0).getSize() + 9;
                             }
-                        }
 
-                        shop.setItems(inventories);
+                            int i = 0;
 
-                        if (!isInfinite) {
+                            if (!isInfinite) {
 
-                            CommonVariables.shopsInventories.remove(shop.getName());
-                            CommonVariables.shopsInventories.put(shop.getName(), inventories);
+                                for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
+
+                                    int j = 0;
+
+                                    Inventory newInventory = Bukkit.createInventory(null, CommonVariables.shopsInventories
+                                                    .get(shop.getName()).get(0).getSize() + 9,
+                                            ChatColor.GOLD + shop.getName() + " " + (i + 1));
+                                    for (ItemStack itemStack : inventory) {
+                                        if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
+                                            newInventory.setItem(j, itemStack);
+                                        }
+                                        j++;
+
+                                    }
+                                    int nextPageIndex = newInventorySize - 1;
+                                    int prevPageIndex = 0;
+                                    if (newInventorySize % 9 == 0) {
+                                        prevPageIndex = nextPageIndex - 8;
+                                    } else {
+                                        prevPageIndex = (newInventorySize / 9) * 9;
+                                    }
+                                    newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                                    newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
+                                    inventories.add(newInventory);
+                                    CommonVariables.shopsInventories.get(shop.getName()).set(i, inventory);
+                                    i++;
+                                }
+
+                            } else {
+
+                                for (Inventory inventory : CommonVariables.infiniteShopsInventories.get(shop.getName())) {
+
+                                    int j = 0;
+
+                                    Inventory newInventory;
+
+                                    if (!shop.isSell()) {
+
+                                        newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
+                                                        .get(shop.getName()).get(0).getSize() + 9,
+                                                ChatColor.GREEN + shop.getName() + " " + (i + 1));
+
+                                    } else {
+
+                                        newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
+                                                        .get(shop.getName()).get(0).getSize() + 9,
+                                                ChatColor.RED + shop.getName() + " " + (i + 1));
+                                    }
+                                    for (ItemStack itemStack : inventory) {
+                                        if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
+                                            newInventory.setItem(j, itemStack);
+                                        }
+                                        j++;
+
+                                    }
+                                    int nextPageIndex = newInventorySize - 1;
+                                    int prevPageIndex = 0;
+                                    if (newInventorySize % 9 == 0) {
+                                        prevPageIndex = nextPageIndex - 8;
+                                    } else {
+                                        prevPageIndex = (newInventorySize / 9) * 9;
+                                    }
+                                    newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                                    newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
+                                    inventories.add(newInventory);
+                                    CommonVariables.infiniteShopsInventories.get(shop.getName()).set(i, inventory);
+                                    i++;
+                                }
+                            }
+
+                            shop.setItems(inventories);
+
+                            if (!isInfinite) {
+
+                                CommonVariables.shopsInventories.remove(shop.getName());
+                                CommonVariables.shopsInventories.put(shop.getName(), inventories);
+                            } else {
+
+                                CommonVariables.infiniteShopsInventories.remove(shop.getName());
+                                CommonVariables.infiniteShopsInventories.put(shop.getName(), inventories);
+                            }
+
+                            event.setCancelled(true);
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                    50, 1);
                         } else {
 
-                            CommonVariables.infiniteShopsInventories.remove(shop.getName());
-                            CommonVariables.infiniteShopsInventories.put(shop.getName(), inventories);
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
+                            event.setCancelled(true);
+                            return;
                         }
 
-                        event.setCancelled(true);
-
-                        player.playSound(player.getLocation(),
-                                org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
-                                50, 1);
                     } else {
 
-                        player.playSound(player.getLocation(),
-                                org.bukkit.Sound.BLOCK_ANVIL_PLACE,
-                                50, 1);
-                        event.setCancelled(true);
-                        return;
+                        Card card = Card.getCard(event.getWhoClicked().getName());
+
+                        if (card == null) {
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
+
+                            event.getWhoClicked().sendMessage(ChatColor.RED + "You do not have a bank card!");
+
+                            event.setCancelled(true);
+
+                            return;
+                        }
+
+                        if (card.hasMoney(ConfigVariables.newLineCostBank) && card.removeMoney(ConfigVariables.newLineCostBank)) {
+
+                            shop.setUpgrade(new Upgrade(shop.getUpgrade().getPageProgress(),
+                                    shop.getUpgrade().getLineProgress() + 1));
+
+                            newLineLore.clear();
+
+                            newLineMeta.setDisplayName(ChatColor.GREEN + "New Line");
+
+                            if (!ConfigVariables.isNewLineCostBank) {
+
+                                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
+                                        ConfigVariables.newLineCost.getType().name());
+
+                            } else {
+
+                                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCostBank + " " +
+                                        "l`argent");
+                            }
+
+                            newLineLore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getLineProgress() + "/6");
+
+                            newLineMeta.setLore(newLineLore);
+                            newLine.setItemMeta(newLineMeta);
+
+                            event.getCurrentItem().setItemMeta(newLineMeta);
+
+                            ArrayList<Inventory> inventories = new ArrayList<>();
+
+                            int newInventorySize;
+
+                            if (!isInfinite) {
+
+                                newInventorySize = CommonVariables.shopsInventories
+                                        .get(shop.getName()).get(0).getSize() + 9;
+                            } else {
+
+                                newInventorySize = CommonVariables.infiniteShopsInventories
+                                        .get(shop.getName()).get(0).getSize() + 9;
+                            }
+
+                            int i = 0;
+
+                            if (!isInfinite) {
+
+                                for (Inventory inventory : CommonVariables.shopsInventories.get(shop.getName())) {
+
+                                    int j = 0;
+
+                                    Inventory newInventory = Bukkit.createInventory(null, CommonVariables.shopsInventories
+                                                    .get(shop.getName()).get(0).getSize() + 9,
+                                            ChatColor.GOLD + shop.getName() + " " + (i + 1));
+                                    for (ItemStack itemStack : inventory) {
+                                        if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
+                                            newInventory.setItem(j, itemStack);
+                                        }
+                                        j++;
+
+                                    }
+                                    int nextPageIndex = newInventorySize - 1;
+                                    int prevPageIndex = 0;
+                                    if (newInventorySize % 9 == 0) {
+                                        prevPageIndex = nextPageIndex - 8;
+                                    } else {
+                                        prevPageIndex = (newInventorySize / 9) * 9;
+                                    }
+                                    newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                                    newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
+                                    inventories.add(newInventory);
+                                    CommonVariables.shopsInventories.get(shop.getName()).set(i, inventory);
+                                    i++;
+                                }
+
+                            } else {
+
+                                for (Inventory inventory : CommonVariables.infiniteShopsInventories.get(shop.getName())) {
+
+                                    int j = 0;
+
+                                    Inventory newInventory;
+
+                                    if (!shop.isSell()) {
+
+                                        newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
+                                                        .get(shop.getName()).get(0).getSize() + 9,
+                                                ChatColor.GREEN + shop.getName() + " " + (i + 1));
+
+                                    } else {
+
+                                        newInventory = Bukkit.createInventory(null, CommonVariables.infiniteShopsInventories
+                                                        .get(shop.getName()).get(0).getSize() + 9,
+                                                ChatColor.RED + shop.getName() + " " + (i + 1));
+                                    }
+                                    for (ItemStack itemStack : inventory) {
+                                        if (itemStack == null || !itemStack.equals(CommonVariables.prevPage) && !itemStack.equals(CommonVariables.nextPage)) {
+                                            newInventory.setItem(j, itemStack);
+                                        }
+                                        j++;
+
+                                    }
+                                    int nextPageIndex = newInventorySize - 1;
+                                    int prevPageIndex = 0;
+                                    if (newInventorySize % 9 == 0) {
+                                        prevPageIndex = nextPageIndex - 8;
+                                    } else {
+                                        prevPageIndex = (newInventorySize / 9) * 9;
+                                    }
+                                    newInventory.setItem(prevPageIndex, CommonVariables.prevPage);
+                                    newInventory.setItem(nextPageIndex, CommonVariables.nextPage);
+                                    inventories.add(newInventory);
+                                    CommonVariables.infiniteShopsInventories.get(shop.getName()).set(i, inventory);
+                                    i++;
+                                }
+                            }
+
+                            shop.setItems(inventories);
+
+                            if (!isInfinite) {
+
+                                CommonVariables.shopsInventories.remove(shop.getName());
+                                CommonVariables.shopsInventories.put(shop.getName(), inventories);
+
+                            } else {
+
+                                CommonVariables.infiniteShopsInventories.remove(shop.getName());
+                                CommonVariables.infiniteShopsInventories.put(shop.getName(), inventories);
+                            }
+
+                            event.setCancelled(true);
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.ENTITY_PLAYER_LEVELUP,
+                                    50, 1);
+                        } else {
+
+                            player.playSound(player.getLocation(),
+                                    org.bukkit.Sound.BLOCK_ANVIL_PLACE,
+                                    50, 1);
+                            event.setCancelled(true);
+                            return;
+                        }
                     }
                 }
 

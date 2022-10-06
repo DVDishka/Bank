@@ -4,6 +4,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Sound;
+import ru.dvdishka.bank.blancville.Card;
 import ru.dvdishka.bank.shops.common.ConfigVariables;
 import ru.dvdishka.bank.shops.Classes.Shop;
 import ru.dvdishka.bank.shops.common.CommonVariables;
@@ -55,17 +56,38 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             CommonVariables.playerShopCreating.put(senderPlayer.getName(), shopName);
 
-            BaseComponent[] text = new ComponentBuilder("Creating a shop costs " + ConfigVariables.shopCost.getAmount() + " "
-                            + ConfigVariables.shopCost.getType().name().toLowerCase() + "\n")
-                    .append("[CREATE]")
-                    .color(net.md_5.bungee.api.ChatColor.GREEN)
-                    .event(new net.md_5.bungee.api.chat.ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND, "/shop creating " + shopName + " " + senderPlayer.getName()))
-                    .append("   ")
-                    .append("[CANCEL]")
-                    .color(net.md_5.bungee.api.ChatColor.RED)
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating cancel " + senderPlayer.getName()))
-                    .create();
+            BaseComponent[] text;
+
+            if (!ConfigVariables.isShopCostBank) {
+
+                text = new ComponentBuilder("Creating a shop costs " + ConfigVariables.shopCost.getAmount() + " "
+                        + ConfigVariables.shopCost.getType().name().toLowerCase() + "\n")
+                        .append("[CREATE]")
+                        .color(net.md_5.bungee.api.ChatColor.GREEN)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating " + shopName + " " + senderPlayer.getName()))
+                        .append("   ")
+                        .append("[CANCEL]")
+                        .color(net.md_5.bungee.api.ChatColor.RED)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating cancel " + senderPlayer.getName()))
+                        .create();
+
+            } else {
+
+                text = new ComponentBuilder("Creating a shop costs " + ConfigVariables.shopCost.getAmount() + " "
+                        + "l`argent" + "\n")
+                        .append("[CREATE]")
+                        .color(net.md_5.bungee.api.ChatColor.GREEN)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating " + shopName + " " + senderPlayer.getName()))
+                        .append("   ")
+                        .append("[CANCEL]")
+                        .color(net.md_5.bungee.api.ChatColor.RED)
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop creating cancel " + senderPlayer.getName()))
+                        .create();
+
+            }
+
             sender.spigot().sendMessage(text);
+
             return true;
         }
 
@@ -80,22 +102,52 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             senderPlayer = Bukkit.getPlayer(args[2]);
             assert senderPlayer != null;
 
-            if (!Functions.removeItem(senderPlayer, ConfigVariables.shopCost)) {
-                senderPlayer.sendMessage(ChatColor.RED + "You do not have " + ConfigVariables.shopCost.getAmount()
-                        + " " + ConfigVariables.shopCost.getType().name().toLowerCase());
-                return false;
+            if (!ConfigVariables.isShopCostBank) {
+
+                if (!Functions.removeItem(senderPlayer, ConfigVariables.shopCost)) {
+
+                    senderPlayer.sendMessage(ChatColor.RED + "You do not have " + ConfigVariables.shopCost.getAmount()
+                            + " " + ConfigVariables.shopCost.getType().name().toLowerCase());
+
+                    return false;
+                }
+
+            } else {
+
+                Card senderCard = Card.getCard(senderPlayer.getName());
+
+                if (senderCard == null) {
+
+                    senderPlayer.sendMessage(ChatColor.RED + "You do not have a bank card!");
+                    return false;
+                }
+
+                if (!senderCard.hasMoney(ConfigVariables.shopCostBank)) {
+
+                    senderPlayer.sendMessage(ChatColor.RED + "You do not have " + ConfigVariables.shopCostBank
+                            + " l`argents on your bank card!");
+
+                    return false;
+                }
+
+                senderCard.removeMoney(ConfigVariables.shopCostBank);
             }
 
             for (Shop checkShop : CommonVariables.shops) {
+
                 if (checkShop.getName().equals(args[1])) {
+
                     senderPlayer.sendMessage(ChatColor.RED + "There is already a shop with the same name!");
+
                     return false;
                 }
             }
             ItemStack icon = new ItemStack(Material.BARRIER);
             ItemMeta iconMeta = icon.getItemMeta();
+
             iconMeta.setDisplayName(args[1]);
             icon.setItemMeta(iconMeta);
+
             Shop shop = new Shop(args[1], senderPlayer.getName(), icon);
             CommonVariables.shops.add(shop);
 
@@ -487,9 +539,20 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             ItemMeta newPageMeta = newPage.getItemMeta();
             newPageMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "New Page");
             List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
-                    ConfigVariables.newPageCost.getType().name());
+
+            if (!ConfigVariables.isNewPageCostBank) {
+
+                lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCost.getAmount() + " " +
+                        ConfigVariables.newPageCost.getType().name());
+
+            } else {
+
+                lore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newPageCostBank + " " +
+                        "l`argent");
+            }
+
             lore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getPageProgress());
+
             newPageMeta.setLore(lore);
             newPage.setItemMeta(newPageMeta);
             inventory.setItem(13, newPage);
@@ -498,9 +561,19 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             ItemMeta newLineMeta = newLine.getItemMeta();
             newLineMeta.setDisplayName(ChatColor.GREEN + "New Line");
             List<String> newLineLore = new ArrayList<>();
-            newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
-                    ConfigVariables.newLineCost.getType().name());
+            if (!ConfigVariables.isNewLineCostBank) {
+
+                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCost.getAmount() + " " +
+                        ConfigVariables.newLineCost.getType().name());
+
+            } else {
+
+                newLineLore.add(ChatColor.GREEN + "Price: " + ChatColor.RED + ConfigVariables.newLineCostBank + " " +
+                        "l`argent");
+            }
+
             newLineLore.add(ChatColor.AQUA + "Progress: " + ChatColor.GOLD + shop.getUpgrade().getLineProgress() + "/6");
+
             newLineMeta.setLore(newLineLore);
             newLine.setItemMeta(newLineMeta);
             inventory.setItem(12, newLine);

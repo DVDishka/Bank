@@ -73,7 +73,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             } else {
 
-                text = new ComponentBuilder("Creating a shop costs " + ConfigVariables.shopCost.getAmount() + " "
+                text = new ComponentBuilder("Creating a shop costs " + ConfigVariables.shopCostBank + " "
                         + "l`argent" + "\n")
                         .append("[CREATE]")
                         .color(net.md_5.bungee.api.ChatColor.GREEN)

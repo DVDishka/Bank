@@ -19,7 +19,7 @@ public class InfiniteSellShopMenuEvent implements Listener {
 
         for (Inventory shopMenuPage : CommonVariables.infiniteSellShopMenu) {
 
-            if (shopMenuPage.equals(event.getClickedInventory())) {
+            if (shopMenuPage == event.getView().getTopInventory()) {
 
                 Player player = (Player) event.getWhoClicked();
 

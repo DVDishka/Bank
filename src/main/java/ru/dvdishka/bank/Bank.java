@@ -260,6 +260,9 @@ public final class Bank extends JavaPlugin {
 
         Initialization.registerEventHandlers(this);
         Initialization.registerCommands();
+        Initialization.shopMenuCreating();
+        Initialization.infiniteSellShopCreating();
+        Initialization.infiniteBuyShopMenuCreating();
 
         CommonVariables.logger.info("Bank plugin has been enabled!");
     }

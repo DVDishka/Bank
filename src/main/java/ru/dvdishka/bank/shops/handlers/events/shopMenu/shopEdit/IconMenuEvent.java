@@ -20,7 +20,7 @@ public class IconMenuEvent implements Listener {
 
         for (Inventory iconMenuPage : CommonVariables.iconMenu) {
 
-            if (iconMenuPage.equals(event.getClickedInventory())) {
+            if (iconMenuPage.equals(event.getView().getTopInventory())) {
 
                 Player player = (Player) event.getWhoClicked();
 

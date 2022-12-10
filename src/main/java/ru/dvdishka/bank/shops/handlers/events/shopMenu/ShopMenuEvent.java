@@ -19,9 +19,11 @@ public class ShopMenuEvent implements Listener {
 
         for (Inventory shopMenuPage : CommonVariables.shopMenu) {
 
-            if (shopMenuPage.equals(event.getClickedInventory())) {
+            if (shopMenuPage == event.getView().getTopInventory()) {
 
                 Player player = (Player) event.getWhoClicked();
+
+                event.setCancelled(true);
 
                 if (event.getCurrentItem() != null) {
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandExecutor implements org.bukkit.command.CommandExecutor {
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -164,6 +165,38 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             CommonVariables.shopsInventories.put(shop.getName(), pages);
             CommonVariables.playerShopCreating.remove(senderPlayer.getName());
 
+            int slotIndex = 0;
+            boolean hasShopBeenAdded = false;
+
+            for (ItemStack item : CommonVariables.shopMenu.get(CommonVariables.shopMenu.size() - 1)) {
+
+                if (item == null || item.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
+
+                    CommonVariables.shopMenu.get(CommonVariables.shopMenu.size() - 1).setItem(slotIndex, icon);
+                    hasShopBeenAdded = true;
+                    break;
+                }
+                slotIndex++;
+            }
+
+            if (!hasShopBeenAdded) {
+
+                Inventory page = Bukkit.createInventory(null, 54,
+                        ChatColor.GOLD + "Shops " + CommonVariables.shopMenu.size() + 1);
+
+                for (int i = 0; i < 54; i++) {
+
+                    page.setItem(i, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                }
+
+                page.setItem(45, CommonVariables.prevPage);
+                page.setItem(53, CommonVariables.nextPage);
+
+                page.setItem(0, icon);
+
+                CommonVariables.shopMenu.add(page);
+            }
+
             senderPlayer.playSound(senderPlayer.getLocation(),
                     Sound.ENTITY_PLAYER_LEVELUP,
                     50, 1);
@@ -186,8 +219,6 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
         if (commandName.equals("open") && args.length == 1) {
 
-            ArrayList<Inventory> shopsIcons = new ArrayList<>();
-
             int shopsAmount = CommonVariables.shops.size();
 
             if (shopsAmount == 0) {
@@ -195,67 +226,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
 
-            int i = 1;
-
-            while (shopsAmount > 0) {
-
-                Inventory page = Bukkit.createInventory(null, 54,
-                        ChatColor.GOLD + "Shops " + i);
-
-                ItemStack prevPage = new ItemStack(Material.ARROW);
-                ItemStack nextPage = new ItemStack(Material.ARROW);
-
-                ItemMeta prevPageMeta = prevPage.getItemMeta();
-                prevPageMeta.setDisplayName("<--");
-                prevPage.setItemMeta(prevPageMeta);
-
-                ItemMeta nextPageMeta = nextPage.getItemMeta();
-                nextPageMeta.setDisplayName("-->");
-                nextPage.setItemMeta(nextPageMeta);
-
-                page.setItem(45, prevPage);
-                page.setItem(53, nextPage);
-
-                shopsIcons.add(page);
-                shopsAmount -= 52;
-                i++;
-            }
-
-            int stackIndex = 0;
-            int inventoryIndex = 0;
-
-            for (Shop shop : CommonVariables.shops) {
-
-                if (stackIndex == 45) {
-
-                    stackIndex++;
-                }
-                if (stackIndex == 53) {
-
-                    stackIndex = 0;
-                    inventoryIndex++;
-                }
-
-                shopsIcons.get(inventoryIndex).setItem(stackIndex, shop.getIcon());
-                stackIndex++;
-            }
-
-            stackIndex = 0;
-
-            Inventory lastPage = shopsIcons.get(inventoryIndex);
-
-            for (ItemStack itemStack : lastPage) {
-
-                if (itemStack == null) {
-
-                    lastPage.setItem(stackIndex, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
-                }
-                stackIndex++;
-            }
-
-            shopsIcons.set(inventoryIndex, lastPage);
-            CommonVariables.shopMenu = shopsIcons;
-            senderPlayer.openInventory(shopsIcons.get(0));
+            senderPlayer.openInventory(CommonVariables.shopMenu.get(0));
 
             return true;
         }
@@ -687,6 +658,38 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             CommonVariables.infiniteShopsInventories.put(newShop.getName(), shopPages);
 
+            int slotIndex = 0;
+            boolean hasShopBeenAdded = false;
+
+            for (ItemStack item : CommonVariables.infiniteSellShopMenu.get(CommonVariables.shopMenu.size() - 1)) {
+
+                if (item == null || item.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
+
+                    CommonVariables.infiniteSellShopMenu.get(CommonVariables.infiniteSellShopMenu.size() - 1).setItem(slotIndex, shopIcon);
+                    hasShopBeenAdded = true;
+                    break;
+                }
+                slotIndex++;
+            }
+
+            if (!hasShopBeenAdded) {
+
+                Inventory page = Bukkit.createInventory(null, 54,
+                        ChatColor.GOLD + "Shops " + CommonVariables.infiniteSellShopMenu.size() + 1);
+
+                for (int i = 0; i < 54; i++) {
+
+                    page.setItem(i, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                }
+
+                page.setItem(45, CommonVariables.prevPage);
+                page.setItem(53, CommonVariables.nextPage);
+
+                page.setItem(0, shopIcon);
+
+                CommonVariables.infiniteSellShopMenu.add(page);
+            }
+
             senderPlayer.sendTitle(ChatColor.DARK_GREEN + newShop.getName(),
                     ChatColor.GOLD + "has been created");
 
@@ -740,6 +743,38 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
             CommonVariables.infiniteShopsInventories.put(newShop.getName(), shopPages);
 
+            int slotIndex = 0;
+            boolean hasShopBeenAdded = false;
+
+            for (ItemStack item : CommonVariables.infiniteBuyShopMenu.get(CommonVariables.shopMenu.size() - 1)) {
+
+                if (item == null || item.getType().equals(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) {
+
+                    CommonVariables.infiniteBuyShopMenu.get(CommonVariables.infiniteBuyShopMenu.size() - 1).setItem(slotIndex, shopIcon);
+                    hasShopBeenAdded = true;
+                    break;
+                }
+                slotIndex++;
+            }
+
+            if (!hasShopBeenAdded) {
+
+                Inventory page = Bukkit.createInventory(null, 54,
+                        ChatColor.GOLD + "Shops " + CommonVariables.infiniteBuyShopMenu.size() + 1);
+
+                for (int i = 0; i < 54; i++) {
+
+                    page.setItem(i, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
+                }
+
+                page.setItem(45, CommonVariables.prevPage);
+                page.setItem(53, CommonVariables.nextPage);
+
+                page.setItem(0, shopIcon);
+
+                CommonVariables.infiniteBuyShopMenu.add(page);
+            }
+
             senderPlayer.sendTitle(ChatColor.DARK_GREEN + newShop.getName(),
                     ChatColor.GOLD + "has been created");
 
@@ -748,16 +783,12 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
         if (commandName.equals("infinite") && args.length == 3 && args[1].equals("sell") && args[2].equals("open")) {
 
-            ArrayList<Inventory> shopsIcons = new ArrayList<>();
-            ArrayList<Shop> infiniteSellShops = new ArrayList<>();
-
             int shopsAmount = 0;
 
             for (Shop shop : CommonVariables.infiniteShops) {
 
                 if (shop.isSell()) {
 
-                    infiniteSellShops.add(shop);
                     shopsAmount++;
                 }
             }
@@ -768,64 +799,12 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 return false;
             }
 
-            int pageNumber = 1;
-
-            while (shopsAmount > 0) {
-
-                Inventory page = Bukkit.createInventory(null, 54,
-                        ChatColor.RED + "Infinite Sell Shops " + pageNumber);
-
-                page.setItem(45, CommonVariables.prevPage);
-                page.setItem(53, CommonVariables.nextPage);
-
-                shopsIcons.add(page);
-                shopsAmount -= 52;
-                pageNumber++;
-            }
-
-            int stackIndex = 0;
-            int inventoryIndex = 0;
-
-            for (Shop shop : infiniteSellShops) {
-
-                if (stackIndex == 45) {
-
-                    stackIndex++;
-                }
-                if (stackIndex == 53) {
-
-                    stackIndex = 0;
-                    inventoryIndex++;
-                }
-
-                shopsIcons.get(inventoryIndex).setItem(stackIndex, shop.getIcon());
-                stackIndex++;
-            }
-
-            stackIndex = 0;
-
-            Inventory lastPage = shopsIcons.get(inventoryIndex);
-
-            for (ItemStack itemStack : lastPage) {
-
-                if (itemStack == null) {
-
-                    lastPage.setItem(stackIndex, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
-                }
-                stackIndex++;
-            }
-
-            shopsIcons.set(inventoryIndex, lastPage);
-            CommonVariables.infiniteSellShopMenu = shopsIcons;
-            senderPlayer.openInventory(shopsIcons.get(0));
+            senderPlayer.openInventory(CommonVariables.infiniteSellShopMenu.get(0));
 
             return true;
         }
 
         if (commandName.equals("infinite") && args.length == 3 && args[1].equals("buy") && args[2].equals("open")) {
-
-            ArrayList<Inventory> shopsIcons = new ArrayList<>();
-            ArrayList<Shop> infiniteBuyShops = new ArrayList<>();
 
             int shopsAmount = 0;
 
@@ -833,7 +812,6 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
 
                 if (!shop.isSell()) {
 
-                    infiniteBuyShops.add(shop);
                     shopsAmount++;
                 }
             }
@@ -843,57 +821,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "There are no shops yet");
                 return false;
             }
-
-            int pageNumber = 1;
-
-            while (shopsAmount > 0) {
-
-                Inventory page = Bukkit.createInventory(null, 54,
-                        ChatColor.GREEN + "Infinite Buy Shops " + pageNumber);
-
-                page.setItem(45, CommonVariables.prevPage);
-                page.setItem(53, CommonVariables.nextPage);
-
-                shopsIcons.add(page);
-                shopsAmount -= 52;
-                pageNumber++;
-            }
-
-            int stackIndex = 0;
-            int inventoryIndex = 0;
-
-            for (Shop shop : infiniteBuyShops) {
-
-                if (stackIndex == 45) {
-
-                    stackIndex++;
-                }
-                if (stackIndex == 53) {
-
-                    stackIndex = 0;
-                    inventoryIndex++;
-                }
-
-                shopsIcons.get(inventoryIndex).setItem(stackIndex, shop.getIcon());
-                stackIndex++;
-            }
-
-            stackIndex = 0;
-
-            Inventory lastPage = shopsIcons.get(inventoryIndex);
-
-            for (ItemStack itemStack : lastPage) {
-
-                if (itemStack == null) {
-
-                    lastPage.setItem(stackIndex, new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
-                }
-                stackIndex++;
-            }
-
-            shopsIcons.set(inventoryIndex, lastPage);
-            CommonVariables.infiniteBuyShopMenu = shopsIcons;
-            senderPlayer.openInventory(shopsIcons.get(0));
+            senderPlayer.openInventory(CommonVariables.infiniteBuyShopMenu.get(0));
 
             return true;
         }

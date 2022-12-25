@@ -413,6 +413,7 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             }
 
             int iconsAmount = Material.values().length - 2;
+
             if (iconsAmount == 0) {
                 sender.sendMessage(ChatColor.RED + "There are no icons yet");
                 return false;

@@ -69,6 +69,25 @@ public class IconMenuEvent implements Listener {
                         player.sendTitle(ChatColor.DARK_GREEN + shop.getName(),
                                 ChatColor.GOLD + "New icon has been set");
                         player.closeInventory();
+
+                        for (Inventory shopMenuPage : CommonVariables.shopMenu) {
+
+                            for (ItemStack shopIcon : shopMenuPage) {
+
+                                if (shopIcon != null) {
+
+                                    ItemMeta shopIconMeta = shopIcon.getItemMeta();
+
+                                    if (shopIconMeta != null) {
+
+                                        if (shopIconMeta.getDisplayName().equals(shop.getName())) {
+
+                                            shopIcon.setType(icon.getType());
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         player.playSound(player.getLocation(),
                                 org.bukkit.Sound.BLOCK_ANVIL_PLACE,
